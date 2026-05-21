@@ -1,0 +1,80 @@
+name: archive-vr-diffs
+
+# PR 머지 시점에 `vrt-snapshots/pr-N` 브랜치(시각 회귀 인라인 이미지의 raw URL 소스)의
+# 모든 PNG 를 main 의 `e2e/visual/__diff_archive__/pr-N/` 디렉토리로 영구 archive.
+#
+# 영구 보존 layer (이중):
+#   1) vrt-snapshots/** 브랜치 자체 — repository ruleset 의 deletion 금지로 보호 가능
+#   2) main 의 __diff_archive__/pr-N/ — main 브랜치 보호로 자동 영구 보존
+#
+# 1) 이 살아있는 한 PR 코멘트의 인라인 이미지 raw URL 도 정상 표시.
+# 2) 는 vrt-snapshots 브랜치에 무슨 일이 생겨도 PNG 자체가 main 에 남는 백업.
+#
+# 시각 변화 history ("어떻게 변화했나") 추적용 — 1인용 프로젝트라도 변경 회수가 누적되면
+# 회고 자료로 가치 큼.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: archive-vr-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect vrt-snapshots branch
+        id: detect
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          SNAPBRANCH="vrt-snapshots/pr-${PR_NUMBER}"
+          if git fetch origin "$SNAPBRANCH" 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "branch=$SNAPBRANCH" >> $GITHUB_OUTPUT
+            echo "→ ${SNAPBRANCH} 발견, archive 진행"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "→ ${SNAPBRANCH} 없음, archive skip"
+          fi
+
+      - name: Copy PNGs to main archive directory
+        if: steps.detect.outputs.exists == 'true'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BRANCH: ${{ steps.detect.outputs.branch }}
+        run: |
+          ARCHIVE_DIR="e2e/visual/__diff_archive__/pr-${PR_NUMBER}"
+          mkdir -p "$ARCHIVE_DIR"
+          git archive --format=tar "origin/${BRANCH}" | tar -x -C "$ARCHIVE_DIR/"
+          echo "→ ${ARCHIVE_DIR} 에 복사 완료"
+          ls -R "$ARCHIVE_DIR" | head -50
+
+      - name: Commit and push archive to main
+        if: steps.detect.outputs.exists == 'true'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "e2e/visual/__diff_archive__/pr-${PR_NUMBER}"
+          if git diff --cached --quiet; then
+            echo "→ archive 할 변경 없음"
+            exit 0
+          fi
+          git commit -m "[ci] Add: archive PR #${PR_NUMBER} visual diff PNGs to main [skip ci]"
+          git push origin main
+          echo "→ main 에 archive commit push 완료"

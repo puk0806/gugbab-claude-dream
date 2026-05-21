@@ -1,0 +1,53 @@
+{
+  "name": "gugbab-dream",
+  "version": "0.1.0",
+  "private": true,
+  "description": "어젯밤 꿈을 적고 톤을 골라 누르면 Claude가 해석해주는 PWA (1인용)",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --webpack",
+    "prebuild": "pnpm compile-prompts",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
+    "check:fix": "biome check --write .",
+    "compile-prompts": "tsx scripts/compile-prompts.ts",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
+    "test:visual:report": "playwright show-report"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
+    "@gugbab/hooks": "^1.0.1",
+    "@gugbab/styled-radix": "^1.0.1",
+    "@gugbab/tokens": "^1.0.0",
+    "@gugbab/utils": "^1.0.1",
+    "@serwist/next": "^9.5.11",
+    "idb": "^8.0.3",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "ulid": "^3.0.2",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
+    "@gugbab/biome-config": "^1.0.0",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "serwist": "^9.5.11",
+    "sharp": "^0.34.5",
+    "tsx": "^4.22.3",
+    "typescript": "^5"
+  }
+}

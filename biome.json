@@ -1,0 +1,66 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "extends": ["@gugbab/biome-config/base.json"],
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "!**/node_modules",
+      "!**/.next",
+      "!**/.turbo",
+      "!**/out",
+      "!**/build",
+      "!**/coverage",
+      "!**/playwright-report",
+      "!**/test-results",
+      "!pnpm-lock.yaml",
+      "!**/.claude",
+      "!**/docs",
+      "!lib/prompts/_compiled",
+      "!e2e/visual/__screenshots__",
+      "!e2e/visual/__diff_archive__",
+      "!public/sw.js",
+      "!public/swe-worker-*.js",
+      "!public/workbox-*.js",
+      "!next-env.d.ts"
+    ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "error",
+        "noConsole": { "level": "warn", "options": { "allow": ["warn", "error"] } }
+      },
+      "style": {
+        "useImportType": "error",
+        "useConst": "error",
+        "noNonNullAssertion": "error",
+        "useNodejsImportProtocol": "error",
+        "useTemplate": "error"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      },
+      "complexity": {
+        "noUselessTypeConstraint": "error",
+        "noBannedTypes": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.test.{ts,tsx}", "**/__tests__/**", "e2e/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off",
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ]
+}
