@@ -354,11 +354,12 @@
       <h1>꿈해몽 PWA</h1>
       <p class="subtitle">사이드 프로젝트 · puk0806</p>
       <div class="meta">
-        <span class="badge status-green">🟢 기획 1차 완성</span>
-        <span class="badge">사용자 리뷰 대기</span>
+        <span class="badge status-green">🟢 Phase 1 + 1-B 부트스트랩 완료</span>
+        <span class="badge accent">Next.js 16.2.6 · React 19 · TS 5</span>
         <span class="badge accent">UI: @gugbab/styled-radix</span>
-        <span class="badge accent">자산 임베드: ON</span>
+        <span class="badge accent">자산 임베드: ON (24개)</span>
         <span class="badge accent">시각 회귀: ON</span>
+        <span class="badge accent">Biome (Prettier 대체)</span>
         <span class="badge">최종 갱신 2026-05-21</span>
       </div>
     </header>
@@ -429,7 +430,7 @@
         </thead>
         <tbody>
           <tr><td>언어</td><td class="tech">TypeScript</td><td class="note">.claude/rules/typescript.md 준수</td></tr>
-          <tr><td>프레임워크</td><td class="tech">Next.js 15 (App Router)</td><td class="note">RSC + SSE 스트리밍</td></tr>
+          <tr><td>프레임워크</td><td class="tech">Next.js 16.2.6 (App Router)</td><td class="note">RSC + SSE 스트리밍 · build는 --webpack (@serwist/next 호환)</td></tr>
           <tr><td>배포</td><td class="tech">Vercel</td><td class="note">API Route를 서버리스로</td></tr>
           <tr><td>PWA</td><td class="tech">@serwist/next (or next-pwa)</td><td class="note">manifest + 오프라인 셸</td></tr>
           <tr><td>UI 시스템</td><td class="tech">@gugbab/styled-radix (Radix Themes 외관 35종)</td><td class="note">npm 게시 완료 · grx-* 클래스</td></tr>
@@ -446,7 +447,7 @@
           <tr><td>테스트</td><td class="tech">vitest + Testing Library</td><td class="note">단위·컴포넌트 테스트</td></tr>
           <tr><td><strong style="color:var(--accent)">시각 회귀</strong></td><td class="tech">Playwright + toHaveScreenshot</td><td class="note">02_voca 패턴 미러링 · CI Linux 단일 베이스라인 · accept-baseline 라벨 · __diff_archive__ 영구 보존</td></tr>
           <tr><td>기능 E2E</td><td class="tech">—</td><td class="note">v1.1 이후 (시각 회귀로 MVP 충분)</td></tr>
-          <tr><td>린트/포맷</td><td class="tech">ESLint + Prettier</td><td class="note">typescript.md 룰 적용</td></tr>
+          <tr><td>린트/포맷</td><td class="tech">Biome + @gugbab/biome-config</td><td class="note">ESLint·Prettier 대체. check / check:fix / lint / format 통합</td></tr>
           <tr><td>환경 변수</td><td class="tech">ANTHROPIC_API_KEY</td><td class="note">서버 전용 · 클라이언트 노출 금지</td></tr>
         </tbody>
       </table>
@@ -493,17 +494,17 @@
       <h2>진행 현황</h2>
       <div class="progress-summary">
         <div class="progress-stat">
-          <div class="num">7<span>/9 단계</span></div>
-          <div class="label">0단계 — 브레인스토밍</div>
+          <div class="num">9<span>/9 단계</span></div>
+          <div class="label">0단계 — 브레인스토밍 완료</div>
         </div>
-        <div class="progress-bar"><div class="fill" style="width: 78%"></div></div>
+        <div class="progress-bar"><div class="fill" style="width: 100%"></div></div>
       </div>
 
       <!-- 0단계 -->
       <div class="phase">
         <div class="phase-head">
           <div class="phase-title">0단계 · 브레인스토밍</div>
-          <div class="phase-meta">7/9 완료</div>
+          <div class="phase-meta">9/9 완료 ✅</div>
         </div>
         <ul class="checklist">
           <li class="done">프로젝트 컨텍스트 탐색</li>
@@ -513,8 +514,8 @@
           <li class="done">설계 2/3 — 데이터 모델·LLM 프롬프트·안전 정책</li>
           <li class="done">설계 3/3 — 에러·테스트·로드맵</li>
           <li class="done">스펙 셀프 리뷰</li>
-          <li class="current">사용자 스펙 최종 리뷰 ← 지금 여기</li>
-          <li>writing-plans 스킬로 구현 계획 작성 진입</li>
+          <li class="done">사용자 스펙 최종 리뷰 (시각 회귀 §11.4 · feature/PR 워크플로우 확정)</li>
+          <li class="done"><strong>writing-plans 스킬로 Phase 1 + 1-B 구현 계획서 작성</strong> → <code>docs/superpowers/plans/2026-05-21-phase-1-bootstrap.md</code> (24 task)</li>
         </ul>
       </div>
 
@@ -522,41 +523,41 @@
       <div class="phase">
         <div class="phase-head">
           <div class="phase-title">1단계 · 프로젝트 초기화</div>
-          <div class="phase-meta">0/13 · 예정</div>
+          <div class="phase-meta">12/13 완료 ✅ (Vercel 사용자 액션)</div>
         </div>
         <ul class="checklist">
-          <li>Next.js 15 + App Router + TypeScript 부트스트랩 (React 19)</li>
-          <li>PWA 설정 (@serwist/next 또는 next-pwa)</li>
-          <li>manifest.json + 아이콘 (192/512)</li>
-          <li>@anthropic-ai/sdk 설치</li>
-          <li>idb (IndexedDB) 설치</li>
-          <li>Zod 설치</li>
-          <li><strong>@gugbab/styled-radix · tokens · hooks · utils 설치</strong></li>
-          <li><strong>layout.tsx에 @gugbab/tokens/radix.css + styled-radix/styles.css 임포트</strong></li>
-          <li><strong style="color:var(--accent)">scripts/compile-prompts.ts 작성 (.claude 자산 → lib/prompts/_compiled/*)</strong></li>
-          <li><strong style="color:var(--accent)">package.json에 prebuild: pnpm compile-prompts 등록</strong></li>
-          <li>ESLint + Prettier + 스크립트</li>
-          <li>.env.local · .env.example</li>
-          <li>Vercel 배포 1회 점검</li>
+          <li class="done">Next.js 16.2.6 + App Router + TypeScript 부트스트랩 (React 19.2.4)</li>
+          <li class="done">PWA — @serwist/next + sw.ts (next build --webpack)</li>
+          <li class="done">manifest.json + 아이콘 placeholder (192/512/180 apple)</li>
+          <li class="done">@anthropic-ai/sdk 0.97.1 설치</li>
+          <li class="done">idb 8.0.3 설치</li>
+          <li class="done">Zod 4.4.3 설치 + ulid 3.0.2</li>
+          <li class="done"><strong>@gugbab/styled-radix 1.0.1 · tokens 1.0.0 · hooks 1.0.1 · utils 1.0.1 설치</strong></li>
+          <li class="done"><strong>layout.tsx에 @gugbab/tokens/radix.css + styled-radix/styles.css 임포트</strong></li>
+          <li class="done"><strong style="color:var(--accent)">scripts/compile-prompts.ts (.claude 자산 → 24개 .ts 컴파일)</strong></li>
+          <li class="done"><strong style="color:var(--accent)">package.json prebuild: pnpm compile-prompts 등록</strong></li>
+          <li class="done">Biome + @gugbab/biome-config (Prettier·ESLint 대체)</li>
+          <li class="done">.env.example + .env.local placeholder (사용자가 키 입력 필요)</li>
+          <li>Vercel 배포 1회 점검 <em style="color:var(--text-faint)">(사용자 액션, PR 머지 후)</em></li>
         </ul>
       </div>
 
       <!-- 1-B 단계: 시각 회귀 인프라 -->
       <div class="phase">
         <div class="phase-head">
-          <div class="phase-title">1-B단계 · <span style="color:var(--accent)">시각 회귀 인프라</span> (UI 첫 라우트 셸 직후)</div>
-          <div class="phase-meta">0/9 · 예정</div>
+          <div class="phase-title">1-B단계 · <span style="color:var(--accent)">시각 회귀 인프라</span></div>
+          <div class="phase-meta">7/9 완료 ✅ (라벨·PR 사용자 액션)</div>
         </div>
         <ul class="checklist">
-          <li>@playwright/test 설치</li>
-          <li>playwright.config.ts (chromium 1280×800, snapshotPathTemplate, webServer: pnpm dev)</li>
-          <li>e2e/visual/ 디렉토리 + README.md (02_voca 미러링)</li>
-          <li>e2e/visual/routes.spec.ts — 빈 셸 / 1건 우선 캡처</li>
-          <li>package.json 스크립트 (test:visual / :update / :report)</li>
-          <li>.github/workflows/visual-regression.yml (compare/accept 2모드 + 인라인 diff 코멘트)</li>
-          <li>.github/workflows/archive-vr-diffs.yml (머지 후 __diff_archive__/pr-N/ 보존)</li>
-          <li>GitHub 라벨 <code>accept-baseline</code> 생성</li>
-          <li>첫 베이스라인 등록 PR — 라벨 → CI 자동 commit 1회 검증</li>
+          <li class="done">@playwright/test 1.60.0 설치</li>
+          <li class="done">playwright.config.ts (chromium 1280×800, snapshotPathTemplate, webServer: pnpm dev)</li>
+          <li class="done">e2e/visual/ 디렉토리 + README.md (02_voca 미러링) + tsconfig.json</li>
+          <li class="done">e2e/visual/routes.spec.ts — 빈 셸 / 1건 우선 캡처</li>
+          <li class="done">package.json 스크립트 (test:visual / :update / :report)</li>
+          <li class="done">.github/workflows/visual-regression.yml (02_voca 미러링)</li>
+          <li class="done">.github/workflows/archive-vr-diffs.yml (02_voca 미러링)</li>
+          <li>GitHub 라벨 <code>accept-baseline</code> 생성 <em style="color:var(--text-faint)">(사용자 액션)</em></li>
+          <li>첫 베이스라인 등록 PR <em style="color:var(--text-faint)">(본 PR 자체가 그 역할)</em></li>
         </ul>
       </div>
 
@@ -634,10 +635,11 @@
       <h2>지금 다음에 할 일</h2>
       <div class="next-list">
         <ol>
-          <li>이 기획서를 검토하고 수정·추가 의견 알려주기</li>
-          <li>승인 → git 커밋</li>
-          <li>writing-plans 스킬로 구현 계획서 작성 단계 진입</li>
-          <li>1단계 · 프로젝트 초기화 시작</li>
+          <li>현재 PR <code>feature/writing-plan-phase-1</code> push → 사용자가 GitHub에서 직접 PR 생성 (제목 예: "Phase 1 + 1-B 부트스트랩 — Next.js · PWA · Biome · 시각 회귀 인프라")</li>
+          <li>GitHub Repository → Labels → <code>accept-baseline</code> 라벨 생성</li>
+          <li>PR의 visual-regression CI fail 확인 → 신규 home 베이스라인 PNG 검토 → <code>accept-baseline</code> 라벨 부여 → CI 자동 commit + PASS → 머지 가능</li>
+          <li>머지 후 Vercel에 레포 연결 + <code>ANTHROPIC_API_KEY</code> 환경변수 + Deploy (1회 점검)</li>
+          <li>새 feature 브랜치 <code>feature/phase-2-planning</code> → Phase 2 + 2-B (핵심 기능 구현 + 시각 회귀 spec 확장) 계획서 작성</li>
         </ol>
       </div>
     </section>
