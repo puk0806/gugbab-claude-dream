@@ -1,0 +1,440 @@
+name: visual-regression
+
+# Phase 3 — Visual Regression 워크플로우.
+#
+# 두 모드:
+#   1. compare (default) — `pnpm test:visual` 로 baseline 과 비교. 차이/신규 발견 시 fail.
+#                          → PR 코멘트에 expected / actual / diff PNG 인라인 표시.
+#                          → 사용자가 시각 확인 후 의도된 변경이면 `accept-baseline` 라벨 부여.
+#   2. accept  — `accept-baseline` 라벨 부여 시 baseline 자동 갱신 + PR 브랜치에 commit.
+#                → 다음 compare 가 통과 → 머지 가능.
+#
+# baseline 미존재 시(신규 라우트 추가 PR 등) 자동 부트스트랩 하지 않는다 —
+# 사용자가 시각 검토 후 라벨 부여하도록 흐름 유도.
+#
+# Main baseline 보충: PR 브랜치가 main 의 최신 baseline 트리를 가지지 않은 경우
+# (예: 오래된 base 에서 분기) 매번 main 의 baseline 을 '신규 후보'로 잡는 잡음이
+# 발생한다. 이를 막기 위해 compare 전에 main 에서 *PR 에 없는 baseline 파일만*
+# 복사한다 — PR 이 수정/추가한 baseline 은 그대로 유지.
+#
+# sibling 프로젝트(@gugbab/* 모노레포)의 visual-regression.yml 패턴을 단일 앱 컨텍스트로
+# 미러링. Storybook 빌드 단계 + paths-filter / mui-radix 분리는 단순화.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  statuses: write
+
+concurrency:
+  group: vrt-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  visual-regression:
+    if: |
+      github.event_name != 'pull_request' ||
+      github.event.action != 'labeled' ||
+      github.event.label.name == 'accept-baseline'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ] \
+              && [ "${{ github.event.action }}" = "labeled" ] \
+              && [ "${{ github.event.label.name }}" = "accept-baseline" ]; then
+            echo "mode=accept" >> $GITHUB_OUTPUT
+            echo "→ accept-baseline 라벨 감지 — baseline 갱신 모드"
+          else
+            echo "mode=compare" >> $GITHUB_OUTPUT
+            echo "→ 시각 회귀 비교 모드"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright (chromium only)
+        run: pnpm exec playwright install --with-deps chromium
+
+      # PR 브랜치가 main 의 최신 baseline 을 가지지 않은 경우 (오래된 base 분기 등)
+      # main 의 baseline 을 'PR 에 없는 파일만' 복사. PR 이 수정/추가한 baseline 은 유지.
+      # 이렇게 하면 main 에 이미 있는 baseline 이 '신규 후보' 로 잡히는 잡음을 막을 수 있다.
+      # 보충된 파일 목록은 /tmp/filled-baseline.txt 에 기록 — accept 모드 commit 전에 제외 처리.
+      - name: Fill missing baseline from origin/main
+        id: fill_baseline
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          : > /tmp/filled-baseline.txt
+          git fetch origin main --depth=1 2>/dev/null || true
+          if ! git rev-parse --verify origin/main >/dev/null 2>&1; then
+            echo "→ origin/main fetch 실패 — skip"
+            exit 0
+          fi
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if [ ! -e "$f" ]; then
+              mkdir -p "$(dirname "$f")"
+              git show "origin/main:$f" > "$f"
+              echo "$f" >> /tmp/filled-baseline.txt
+            fi
+          done < <(git ls-tree -r origin/main --name-only -- e2e/visual/__screenshots__/ 2>/dev/null || true)
+          count=$(grep -c . /tmp/filled-baseline.txt 2>/dev/null || echo 0)
+          echo "→ main 에서 보충된 baseline: ${count} files"
+
+      - name: Detect baseline existence
+        id: baseline
+        run: |
+          shopt -s nullglob globstar
+          files=(e2e/visual/__screenshots__/**/*.png)
+          if [ ${#files[@]} -gt 0 ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "→ baseline 존재: ${#files[@]} files"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "→ baseline 미존재"
+          fi
+
+      # ─────────────────────────────────────────────────────────────
+      # ACCEPT 모드 — 라벨 부여 시 baseline 갱신 + PR 브랜치 commit
+      # ─────────────────────────────────────────────────────────────
+
+      - name: Generate accepted baseline
+        if: steps.mode.outputs.mode == 'accept'
+        run: pnpm test:visual:update
+
+      - name: Commit accepted baseline to PR branch
+        id: accept_commit
+        if: steps.mode.outputs.mode == 'accept'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # main 에서 보충된 baseline 중 *test:visual:update 후에도 main 과 동일* 한 파일은
+          # PR 이 시각 변경을 만들지 않은 것이므로 working tree 에서 제거 — commit 잡음 방지.
+          # 다른 파일은 PR 이 시각 변경을 만든 것 → 그대로 두고 commit 대상에 포함.
+          if [ -f /tmp/filled-baseline.txt ] && [ -s /tmp/filled-baseline.txt ]; then
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              if git show "origin/main:$f" > /tmp/orig-baseline.png 2>/dev/null; then
+                if cmp -s "$f" /tmp/orig-baseline.png; then
+                  rm -f "$f"
+                fi
+              fi
+            done < /tmp/filled-baseline.txt
+            rm -f /tmp/orig-baseline.png
+          fi
+          git add e2e/visual/__screenshots__
+          if git diff --cached --quiet; then
+            echo "pushed=false" >> $GITHUB_OUTPUT
+            echo "target_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+            echo "→ baseline 변경 없음 — commit skip"
+            exit 0
+          fi
+          git commit -m "[ci] Modify: accepted baseline via accept-baseline label"
+          NEW_SHA=$(git rev-parse HEAD)
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          echo "pushed=true" >> $GITHUB_OUTPUT
+          echo "target_sha=$NEW_SHA" >> $GITHUB_OUTPUT
+          echo "→ baseline commit push 완료 (SHA=$NEW_SHA)"
+
+      # GITHUB_TOKEN push commit 은 워크플로우를 새로 트리거하지 못함 — required
+      # status check 가 stuck 되지 않도록 새 SHA 에 status 를 직접 등록.
+      - name: Register visual-regression status on baseline SHA
+        if: steps.mode.outputs.mode == 'accept'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_SHA: ${{ steps.accept_commit.outputs.target_sha }}
+          PUSHED: ${{ steps.accept_commit.outputs.pushed }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+          SERVER: ${{ github.server_url }}
+        run: |
+          if [ "$PUSHED" = "true" ]; then
+            DESC="baseline accepted via accept-baseline label"
+          else
+            DESC="accept-baseline label re-applied — no baseline diff"
+          fi
+          gh api -X POST "repos/${REPO}/statuses/${TARGET_SHA}" \
+            -f state=success \
+            -f context=visual-regression \
+            -f description="${DESC}" \
+            -f target_url="${SERVER}/${REPO}/actions/runs/${RUN_ID}"
+          echo "→ visual-regression status 등록 완료 on ${TARGET_SHA}"
+
+      - name: Comment PR — baseline accepted
+        if: steps.mode.outputs.mode == 'accept'
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            ## ✅ Baseline Accepted
+
+            `accept-baseline` 라벨 감지 — baseline 을 이 PR 의 시각 변경으로 갱신 + PR 브랜치에 commit 했습니다.
+
+            - 새 baseline PNG 가 PR 브랜치에 commit 됨 — *Files changed* 탭에서 PNG 시각 검수 가능
+            - CI 가 자동 재실행되어 통과 — baseline = 현재 코드 캡처
+            - 머지하면 코드 + 새 baseline 이 한 번에 main 에 박제됨
+            - 위쪽 인라인 diff 이미지(`vrt-diff-images` 태그)는 영구 보존됩니다.
+          comment-tag: vrt-status
+          mode: upsert
+
+      # ─────────────────────────────────────────────────────────────
+      # COMPARE 모드 — baseline ↔ 현재 캡처 비교
+      # ─────────────────────────────────────────────────────────────
+
+      - name: Run visual regression (compare)
+        id: vr_compare
+        if: steps.mode.outputs.mode == 'compare' && steps.baseline.outputs.exists == 'true'
+        run: pnpm test:visual
+        continue-on-error: true
+
+      - name: Run visual regression (baseline 미존재 — 신규 캡처용)
+        id: vr_new
+        if: steps.mode.outputs.mode == 'compare' && steps.baseline.outputs.exists == 'false'
+        run: pnpm test:visual:update
+        continue-on-error: true
+
+      - name: Collect failing/new screenshots
+        id: collect
+        if: |
+          steps.mode.outputs.mode == 'compare' &&
+          github.event_name == 'pull_request' &&
+          (steps.vr_compare.outcome == 'failure' || steps.baseline.outputs.exists == 'false')
+        run: |
+          set -euo pipefail
+          OUTDIR=vr-snapshots
+          rm -rf "$OUTDIR" && mkdir -p "$OUTDIR"
+
+          changed=0
+          new=0
+
+          # baseline 있는 경우: test-results 디렉토리에서 expected/actual/diff 수집
+          if [ -d test-results ]; then
+            for dir in test-results/*/; do
+              [ -d "$dir" ] || continue
+              name=$(basename "$dir")
+
+              expected=$(ls "$dir"*-expected.png 2>/dev/null | head -n1 || true)
+              actual=$(ls "$dir"*-actual.png 2>/dev/null | head -n1 || true)
+              diff=$(ls "$dir"*-diff.png 2>/dev/null | head -n1 || true)
+
+              if [ -n "$expected" ] && [ -n "$actual" ] && [ -n "$diff" ]; then
+                mkdir -p "$OUTDIR/$name"
+                cp "$expected" "$OUTDIR/$name/expected.png"
+                cp "$actual"   "$OUTDIR/$name/actual.png"
+                cp "$diff"     "$OUTDIR/$name/diff.png"
+                echo "changed" > "$OUTDIR/$name/.type"
+                changed=$((changed + 1))
+              elif [ -n "$actual" ]; then
+                mkdir -p "$OUTDIR/$name"
+                cp "$actual" "$OUTDIR/$name/actual.png"
+                echo "new" > "$OUTDIR/$name/.type"
+                new=$((new + 1))
+              fi
+            done
+          fi
+
+          # baseline 미존재 + 신규 캡처 모드: __screenshots__ 에 새로 생긴 PNG 를 actual 로 표시
+          if [ "${{ steps.baseline.outputs.exists }}" = "false" ] && [ -d e2e/visual/__screenshots__ ]; then
+            for png in $(find e2e/visual/__screenshots__ -type f -name '*.png'); do
+              name=$(basename "$png" .png)
+              # 충돌 회피: test-results 에서 이미 처리됐으면 skip
+              if [ -d "$OUTDIR/$name" ]; then
+                continue
+              fi
+              mkdir -p "$OUTDIR/$name"
+              cp "$png" "$OUTDIR/$name/actual.png"
+              echo "new" > "$OUTDIR/$name/.type"
+              new=$((new + 1))
+            done
+          fi
+
+          total=$((changed + new))
+          echo "changed_count=$changed" >> $GITHUB_OUTPUT
+          echo "new_count=$new" >> $GITHUB_OUTPUT
+          echo "total_count=$total" >> $GITHUB_OUTPUT
+          echo "→ inline preview 대상: changed=$changed / new=$new (total=$total)"
+
+      - name: Push snapshots to vrt-snapshots/pr-N branch
+        if: |
+          steps.mode.outputs.mode == 'compare' &&
+          github.event_name == 'pull_request' &&
+          steps.collect.outputs.total_count != '0'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          SNAPBRANCH="vrt-snapshots/pr-${PR_NUMBER}"
+          TMPDIR=$(mktemp -d)
+          git worktree add --orphan -B "$SNAPBRANCH" "$TMPDIR"
+          (
+            cd "$TMPDIR"
+            git rm -rf . 2>/dev/null || true
+            cp -R "$GITHUB_WORKSPACE/vr-snapshots/." .
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            if git diff --cached --quiet; then
+              echo "No snapshots to commit"
+            else
+              git commit -m "vrt: snapshots for PR #${PR_NUMBER} (run ${RUN_ID})"
+              git push -f origin "HEAD:${SNAPBRANCH}"
+              echo "→ Pushed to ${SNAPBRANCH}"
+            fi
+          )
+          git worktree remove "$TMPDIR" --force
+
+      - name: Build inline image comment body
+        id: comment_body
+        if: |
+          steps.mode.outputs.mode == 'compare' &&
+          github.event_name == 'pull_request' &&
+          steps.collect.outputs.total_count != '0'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RUN_ID: ${{ github.run_id }}
+          REPO: ${{ github.repository }}
+          SERVER: ${{ github.server_url }}
+          CHANGED_COUNT: ${{ steps.collect.outputs.changed_count }}
+          NEW_COUNT: ${{ steps.collect.outputs.new_count }}
+          TOTAL_COUNT: ${{ steps.collect.outputs.total_count }}
+        run: |
+          set -euo pipefail
+          SNAPBRANCH="vrt-snapshots/pr-${PR_NUMBER}"
+          BASE_URL="https://raw.githubusercontent.com/${REPO}/${SNAPBRANCH}"
+          LIMIT=20
+
+          {
+            if [ "$CHANGED_COUNT" -gt 0 ] && [ "$NEW_COUNT" -gt 0 ]; then
+              echo "## ❌ Visual Regression — ${CHANGED_COUNT} 시각 차이 + ${NEW_COUNT} 신규 baseline 후보"
+            elif [ "$CHANGED_COUNT" -gt 0 ]; then
+              echo "## ❌ Visual Regression — ${CHANGED_COUNT} 시각 차이 감지"
+            else
+              echo "## 🆕 Visual Regression — ${NEW_COUNT} 신규 baseline 후보 (시각 차이 없음)"
+            fi
+            echo ""
+            echo "의도된 변경/추가이면 PR 에 \`accept-baseline\` 라벨을 붙여주세요. baseline 이 자동 갱신/추가되어 PR 브랜치에 commit 됩니다 (코드 + 새 baseline 한 번에 머지)."
+            echo ""
+
+            shown=0
+            for storydir in vr-snapshots/*/; do
+              [ -d "$storydir" ] || continue
+              if [ "$shown" -ge "$LIMIT" ]; then
+                remain=$((TOTAL_COUNT - LIMIT))
+                echo ""
+                echo "_… 외 ${remain} 건. 전체는 [Run details](${SERVER}/${REPO}/actions/runs/${RUN_ID}) 의 \`playwright-report\` artifact 참고._"
+                break
+              fi
+              story=$(basename "$storydir")
+              type=$(cat "$storydir.type" 2>/dev/null || echo changed)
+              echo ""
+              if [ "$type" = "new" ]; then
+                echo "### \`${story}\` 🆕 신규"
+                echo ""
+                echo "<table><tr>"
+                echo "<td align=\"center\" width=\"320\"><b>Expected</b><br><i>(없음 — 신규 라우트)</i></td>"
+                echo "<td align=\"center\"><b>Actual</b><br><img src=\"${BASE_URL}/${story}/actual.png\" width=\"320\"></td>"
+                echo "</tr></table>"
+              else
+                echo "### \`${story}\`"
+                echo ""
+                echo "<table><tr>"
+                echo "<td align=\"center\"><b>Expected</b><br><img src=\"${BASE_URL}/${story}/expected.png\" width=\"320\"></td>"
+                echo "<td align=\"center\"><b>Actual</b><br><img src=\"${BASE_URL}/${story}/actual.png\" width=\"320\"></td>"
+                echo "<td align=\"center\"><b>Diff</b><br><img src=\"${BASE_URL}/${story}/diff.png\" width=\"320\"></td>"
+                echo "</tr></table>"
+              fi
+              shown=$((shown + 1))
+            done
+
+            echo ""
+            echo "---"
+            echo "[📂 Run details](${SERVER}/${REPO}/actions/runs/${RUN_ID}) · Snapshots: \`${SNAPBRANCH}\`"
+          } > comment-body.md
+
+          {
+            echo "body<<COMMENT_EOF"
+            cat comment-body.md
+            echo "COMMENT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR — inline diff images (failure / new)
+        if: |
+          steps.mode.outputs.mode == 'compare' &&
+          github.event_name == 'pull_request' &&
+          steps.collect.outputs.total_count != '0'
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: ${{ steps.comment_body.outputs.body }}
+          comment-tag: vrt-diff-images
+          mode: upsert
+
+      - name: Comment PR — passed (no diff)
+        if: |
+          steps.mode.outputs.mode == 'compare' &&
+          steps.baseline.outputs.exists == 'true' &&
+          steps.vr_compare.outcome == 'success' &&
+          github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            ## ✅ Visual Regression — 모든 시각 검사 통과
+
+            baseline 과 시각 차이 없음 — 머지 가능.
+
+            [Run details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          comment-tag: vrt-status
+          mode: upsert
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Upload diff artifacts on failure
+        if: steps.vr_compare.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vrt-test-results-${{ github.run_id }}
+          path: test-results/
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Propagate compare failure
+        if: |
+          steps.mode.outputs.mode == 'compare' &&
+          (steps.vr_compare.outcome == 'failure' || steps.baseline.outputs.exists == 'false')
+        run: |
+          echo "Visual regression detected — see PR comment for inline diff."
+          echo "의도된 변경이면 PR 에 'accept-baseline' 라벨 부여."
+          exit 1
