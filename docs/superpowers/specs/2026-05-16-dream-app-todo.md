@@ -110,3 +110,4 @@
 | 2026-05-21 | 시각 회귀 테스트 MVP 포함 결정 (sibling `02_gugbab-claude-voca` 패턴 미러링). 1단계 1-B(인프라 9개), 2단계 2-B(spec 확장 4개), 3단계에 베이스라인 갱신 1개 추가. UI 첫 라우트 셸 직후부터 ON |
 | 2026-05-21 | 0단계 완료. `feature/writing-plan-phase-1` 브랜치에서 `writing-plans` 스킬로 Phase 1 + 1-B 통합 구현 계획서 (`docs/superpowers/plans/2026-05-21-phase-1-bootstrap.md`, 24 task) 산출 |
 | 2026-05-21 | **Phase 1 + 1-B 실제 부트스트랩 실행**: Next.js 16.2.6 + React 19 + TS5 + Biome(Prettier 대체) + @gugbab/* 4종 + @serwist/next + compile-prompts(24개) + Playwright + GH Actions 2종. 사용자 액션 잔여 2건(Vercel 배포 점검, GitHub `accept-baseline` 라벨 + 첫 베이스라인 PR). 본 PR 자체가 첫 베이스라인 PR 역할 |
+| 2026-05-21 | **시각 회귀 머지 게이트 적용**: 레포 Public 전환 + `scripts/setup-branch-protection.sh` 추가 + main 브랜치 보호 적용 (02_voca 미러링: required_status_checks.contexts=[visual-regression], strict=true, allow_force_pushes/deletions=false). 이제 시각 회귀 CI PASS 안 하면 머지 불가 — 시각 변화 시 `accept-baseline` 라벨 흐름 강제 |

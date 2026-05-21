@@ -360,6 +360,7 @@
         <span class="badge accent">자산 임베드: ON (24개)</span>
         <span class="badge accent">시각 회귀: ON</span>
         <span class="badge accent">Biome (Prettier 대체)</span>
+        <span class="badge accent">머지 게이트: visual-regression 필수</span>
         <span class="badge">최종 갱신 2026-05-21</span>
       </div>
     </header>
@@ -635,9 +636,10 @@
       <h2>지금 다음에 할 일</h2>
       <div class="next-list">
         <ol>
-          <li>현재 PR <code>feature/writing-plan-phase-1</code> push → 사용자가 GitHub에서 직접 PR 생성 (제목 예: "Phase 1 + 1-B 부트스트랩 — Next.js · PWA · Biome · 시각 회귀 인프라")</li>
-          <li>GitHub Repository → Labels → <code>accept-baseline</code> 라벨 생성</li>
-          <li>PR의 visual-regression CI fail 확인 → 신규 home 베이스라인 PNG 검토 → <code>accept-baseline</code> 라벨 부여 → CI 자동 commit + PASS → 머지 가능</li>
+          <li><strong>GitHub Repository → Labels → <code>accept-baseline</code> 라벨 생성</strong> (워크플로우 동작 조건)</li>
+          <li>현재 PR <code>feature/writing-plan-phase-1</code> 사용자가 GitHub에서 직접 PR 생성 (제목 예: "Phase 1 + 1-B 부트스트랩 — Next.js · PWA · Biome · 시각 회귀 인프라")</li>
+          <li>visual-regression CI 자동 실행 → 베이스라인 없으므로 fail + PR 코멘트에 신규 home actual PNG 표시 → <strong>머지 잠김 (Branch Protection)</strong></li>
+          <li>신규 PNG 검토 → <code>accept-baseline</code> 라벨 부여 → CI 자동 commit + PASS → 머지 가능</li>
           <li>머지 후 Vercel에 레포 연결 + <code>ANTHROPIC_API_KEY</code> 환경변수 + Deploy (1회 점검)</li>
           <li>새 feature 브랜치 <code>feature/phase-2-planning</code> → Phase 2 + 2-B (핵심 기능 구현 + 시각 회귀 spec 확장) 계획서 작성</li>
         </ol>
