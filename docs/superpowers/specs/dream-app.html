@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>꿈해몽 PWA — 기획서 대시보드</title>
+  <style>
+    :root {
+      --bg: #0f0a1e;
+      --bg-card: #1a1430;
+      --bg-card-hover: #221a3d;
+      --text: #e8e4f3;
+      --text-dim: #a39bbf;
+      --text-faint: #6b6485;
+      --accent: #a78bfa;
+      --accent-strong: #8b5cf6;
+      --accent-glow: rgba(167, 139, 250, 0.25);
+      --green: #6ee7b7;
+      --yellow: #fcd34d;
+      --red: #fca5a5;
+      --border: #2d2348;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+      background: linear-gradient(135deg, #0f0a1e 0%, #160d2e 100%);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 32px 16px 64px;
+    }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+
+    header {
+      text-align: center;
+      padding: 48px 24px 32px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-size: 38px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent) 0%, #ec4899 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    header .subtitle {
+      color: var(--text-dim);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+    header .meta {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .badge.status-green { color: var(--green); border-color: rgba(110, 231, 183, 0.3); }
+    .badge.status-yellow { color: var(--yellow); border-color: rgba(252, 211, 77, 0.3); }
+    .badge.accent { background: var(--accent-glow); color: var(--accent); border-color: var(--accent-strong); }
+
+    section {
+      margin-bottom: 48px;
+    }
+    section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    section h2::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 22px;
+      background: linear-gradient(180deg, var(--accent) 0%, #ec4899 100%);
+      border-radius: 2px;
+    }
+
+    /* 한 줄 정의 */
+    .pitch {
+      background: var(--bg-card);
+      border-left: 4px solid var(--accent);
+      padding: 24px 28px;
+      border-radius: 12px;
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .pitch strong { color: var(--accent); }
+
+    /* 카드 그리드 */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-strong);
+    }
+    .card .label {
+      font-size: 12px;
+      color: var(--text-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .card .value {
+      font-size: 15px;
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .card .note {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    /* 표 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: rgba(167, 139, 250, 0.08);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    tr:last-child td { border-bottom: none; }
+    td.tech { font-weight: 600; color: var(--text); }
+    td.note { color: var(--text-dim); font-size: 13px; }
+
+    /* 화면 흐름 */
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .screen {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .screen .route {
+      display: inline-block;
+      font-family: "SF Mono", Menlo, monospace;
+      font-size: 13px;
+      color: var(--accent);
+      background: rgba(167, 139, 250, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .screen .title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .screen ul {
+      list-style: none;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .screen li {
+      padding-left: 14px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+    .screen li::before {
+      content: "·";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* 진행률 */
+    .progress-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .progress-stat {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+    .progress-stat .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .progress-stat .num span { font-size: 16px; color: var(--text-faint); font-weight: 500; }
+    .progress-stat .label { font-size: 13px; color: var(--text-dim); }
+    .progress-bar {
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, #ec4899 100%);
+      transition: width 0.4s ease;
+    }
+
+    /* 체크리스트 */
+    .phase {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .phase-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .phase-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .phase-meta { font-size: 12px; color: var(--text-faint); }
+    .checklist { list-style: none; }
+    .checklist li {
+      padding: 8px 0 8px 28px;
+      position: relative;
+      font-size: 14px;
+      color: var(--text);
+      border-bottom: 1px solid rgba(45, 35, 72, 0.5);
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--text-faint);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .checklist li.done {
+      color: var(--text-faint);
+      text-decoration: line-through;
+      text-decoration-color: rgba(110, 231, 183, 0.5);
+    }
+    .checklist li.done::before {
+      background: var(--green);
+      border-color: var(--green);
+      content: "✓";
+      color: #0f0a1e;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .checklist li.current {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .checklist li.current::before {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      content: "▶";
+      color: var(--accent);
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    /* Next steps */
+    .next-list {
+      background: linear-gradient(135deg, rgba(167, 139, 250, 0.08) 0%, rgba(236, 72, 153, 0.04) 100%);
+      border: 1px solid var(--accent-strong);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .next-list ol {
+      padding-left: 20px;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .next-list li { padding: 6px 0; }
+
+    footer {
+      text-align: center;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--text-faint);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    footer code {
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- 헤더 -->
+    <header>
+      <h1>꿈해몽 PWA</h1>
+      <p class="subtitle">사이드 프로젝트 · puk0806</p>
+      <div class="meta">
+        <span class="badge status-green">🟢 기획 1차 완성</span>
+        <span class="badge">사용자 리뷰 대기</span>
+        <span class="badge accent">UI: @gugbab/styled-radix</span>
+        <span class="badge accent">자산 임베드: ON</span>
+        <span class="badge accent">시각 회귀: ON</span>
+        <span class="badge">최종 갱신 2026-05-21</span>
+      </div>
+    </header>
+
+    <!-- 한 줄 정의 -->
+    <section>
+      <h2>한 줄 정의</h2>
+      <div class="pitch">
+        사용자가 어젯밤 꿈을 적고 <strong>톤(캐주얼 · 자기 성찰 · 한국 전통) 중 하나를 골라 누르면</strong>,
+        Claude가 그 톤에 맞게 해몽해주는 <strong>PWA</strong>. 회원가입 없음, 서버 DB 없음,
+        브라우저 로컬에 최근 100건만 저장.
+      </div>
+    </section>
+
+    <!-- 핵심 결정 -->
+    <section>
+      <h2>핵심 결정</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="label">형태</div>
+          <div class="value">단발 해몽 도구</div>
+          <div class="note">입력 → 결과 1회. 빠른 MVP.</div>
+        </div>
+        <div class="card">
+          <div class="label">톤 (사용자 선택)</div>
+          <div class="value">캐주얼 / 자기 성찰 / 한국 전통</div>
+          <div class="note">기본값: 자기 성찰</div>
+        </div>
+        <div class="card">
+          <div class="label">응답 구조</div>
+          <div class="value">단일 톤 모드 (A안)</div>
+          <div class="note">결과 화면에 "다른 톤으로 보기" 버튼</div>
+        </div>
+        <div class="card">
+          <div class="label">저장</div>
+          <div class="value">IndexedDB 100건 LRU</div>
+          <div class="note">서버 DB 없음, 회원가입 없음</div>
+        </div>
+        <div class="card">
+          <div class="label">비용 모델</div>
+          <div class="value">무료 무제한</div>
+          <div class="note">사이드 프로젝트. 공개 시 한도 추가 권고</div>
+        </div>
+        <div class="card">
+          <div class="label">안전 정책</div>
+          <div class="value">위기 신호 시 해몽 차단</div>
+          <div class="note">109 · 1577-0199 · 1388 안내 카드</div>
+        </div>
+        <div class="card">
+          <div class="label">UI 시스템</div>
+          <div class="value">@gugbab/styled-radix</div>
+          <div class="note">Radix Themes 외관 35종 · npm 게시</div>
+        </div>
+        <div class="card" style="border-color: var(--accent-strong); background: linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(236,72,153,0.04) 100%);">
+          <div class="label" style="color: var(--accent);">⭐ 핵심 차별점</div>
+          <div class="value">.claude 자산을 시스템 프롬프트로 임베드</div>
+          <div class="note">한국 전통 해몽 · 융/프로이트 · 한국형 위기 자원 통째 흡수</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기술 스택 -->
+    <section>
+      <h2>기술 스택</h2>
+      <table>
+        <thead>
+          <tr><th style="width:30%">레이어</th><th>선택</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>언어</td><td class="tech">TypeScript</td><td class="note">.claude/rules/typescript.md 준수</td></tr>
+          <tr><td>프레임워크</td><td class="tech">Next.js 15 (App Router)</td><td class="note">RSC + SSE 스트리밍</td></tr>
+          <tr><td>배포</td><td class="tech">Vercel</td><td class="note">API Route를 서버리스로</td></tr>
+          <tr><td>PWA</td><td class="tech">@serwist/next (or next-pwa)</td><td class="note">manifest + 오프라인 셸</td></tr>
+          <tr><td>UI 시스템</td><td class="tech">@gugbab/styled-radix (Radix Themes 외관 35종)</td><td class="note">npm 게시 완료 · grx-* 클래스</td></tr>
+          <tr><td>디자인 토큰</td><td class="tech">@gugbab/tokens</td><td class="note">CSS 변수 (radix.css 임포트)</td></tr>
+          <tr><td>공용 훅</td><td class="tech">@gugbab/hooks</td><td class="note">lifecycle / ref / state / dom 11종</td></tr>
+          <tr><td>공용 유틸</td><td class="tech">@gugbab/utils</td><td class="note">string / object / array / guard / format 22종</td></tr>
+          <tr><td>React 버전</td><td class="tech">React 19</td><td class="note">styled-radix peer dep ≥ 18 충족</td></tr>
+          <tr><td>검증</td><td class="tech">Zod</td><td class="note">API Route 입력</td></tr>
+          <tr><td>로컬 저장</td><td class="tech">IndexedDB via idb</td><td class="note">DB gugbab-dream v1 / store entries</td></tr>
+          <tr><td>LLM (해몽)</td><td class="tech">Anthropic Claude Sonnet 4.6 (Messages API)</td><td class="note">@anthropic-ai/sdk + 프롬프트 캐싱 + SSE · Agent SDK 미사용 (Vercel 서버리스 비호환)</td></tr>
+          <tr><td><strong style="color:var(--accent)">자산 통합</strong></td><td class="tech">.claude/agents + skills → 시스템 프롬프트 임베드</td><td class="note">scripts/compile-prompts.ts (prebuild) → lib/prompts/_compiled/*.ts</td></tr>
+          <tr><td>LLM (안전 분류)</td><td class="tech">Claude Haiku 4.5</td><td class="note">저비용·빠른 JSON 분류</td></tr>
+          <tr><td>ID</td><td class="tech">ULID</td><td class="note">정렬 가능한 짧은 ID</td></tr>
+          <tr><td>테스트</td><td class="tech">vitest + Testing Library</td><td class="note">단위·컴포넌트 테스트</td></tr>
+          <tr><td><strong style="color:var(--accent)">시각 회귀</strong></td><td class="tech">Playwright + toHaveScreenshot</td><td class="note">02_voca 패턴 미러링 · CI Linux 단일 베이스라인 · accept-baseline 라벨 · __diff_archive__ 영구 보존</td></tr>
+          <tr><td>기능 E2E</td><td class="tech">—</td><td class="note">v1.1 이후 (시각 회귀로 MVP 충분)</td></tr>
+          <tr><td>린트/포맷</td><td class="tech">ESLint + Prettier</td><td class="note">typescript.md 룰 적용</td></tr>
+          <tr><td>환경 변수</td><td class="tech">ANTHROPIC_API_KEY</td><td class="note">서버 전용 · 클라이언트 노출 금지</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 화면 -->
+    <section>
+      <h2>화면 흐름</h2>
+      <div class="screens">
+        <div class="screen">
+          <span class="route">/</span>
+          <div class="title">홈 — 입력</div>
+          <ul>
+            <li>꿈 textarea</li>
+            <li>톤 칩 3개 (기본: 자기 성찰)</li>
+            <li>해석하기 버튼</li>
+            <li>최근 해몽 3건 카드</li>
+          </ul>
+        </div>
+        <div class="screen">
+          <span class="route">/result/[id]</span>
+          <div class="title">결과 — 스트리밍</div>
+          <ul>
+            <li>꿈 요약 + 톤 배지</li>
+            <li>본문 스트리밍 렌더</li>
+            <li>다른 톤으로 보기 · 복사 · 삭제</li>
+            <li>위기 신호 시 SafetyResourceCard</li>
+          </ul>
+        </div>
+        <div class="screen">
+          <span class="route">/history</span>
+          <div class="title">히스토리</div>
+          <ul>
+            <li>최근 100건 리스트</li>
+            <li>날짜 · 톤 · 첫 문장</li>
+            <li>단건 / 전체 삭제</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 진행률 -->
+    <section>
+      <h2>진행 현황</h2>
+      <div class="progress-summary">
+        <div class="progress-stat">
+          <div class="num">7<span>/9 단계</span></div>
+          <div class="label">0단계 — 브레인스토밍</div>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width: 78%"></div></div>
+      </div>
+
+      <!-- 0단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">0단계 · 브레인스토밍</div>
+          <div class="phase-meta">7/9 완료</div>
+        </div>
+        <ul class="checklist">
+          <li class="done">프로젝트 컨텍스트 탐색</li>
+          <li class="done">핵심 의도·범위 합의</li>
+          <li class="done">응답 구조 결정 (A안)</li>
+          <li class="done">설계 1/3 — 아키텍처·화면·모듈 구조</li>
+          <li class="done">설계 2/3 — 데이터 모델·LLM 프롬프트·안전 정책</li>
+          <li class="done">설계 3/3 — 에러·테스트·로드맵</li>
+          <li class="done">스펙 셀프 리뷰</li>
+          <li class="current">사용자 스펙 최종 리뷰 ← 지금 여기</li>
+          <li>writing-plans 스킬로 구현 계획 작성 진입</li>
+        </ul>
+      </div>
+
+      <!-- 1단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">1단계 · 프로젝트 초기화</div>
+          <div class="phase-meta">0/13 · 예정</div>
+        </div>
+        <ul class="checklist">
+          <li>Next.js 15 + App Router + TypeScript 부트스트랩 (React 19)</li>
+          <li>PWA 설정 (@serwist/next 또는 next-pwa)</li>
+          <li>manifest.json + 아이콘 (192/512)</li>
+          <li>@anthropic-ai/sdk 설치</li>
+          <li>idb (IndexedDB) 설치</li>
+          <li>Zod 설치</li>
+          <li><strong>@gugbab/styled-radix · tokens · hooks · utils 설치</strong></li>
+          <li><strong>layout.tsx에 @gugbab/tokens/radix.css + styled-radix/styles.css 임포트</strong></li>
+          <li><strong style="color:var(--accent)">scripts/compile-prompts.ts 작성 (.claude 자산 → lib/prompts/_compiled/*)</strong></li>
+          <li><strong style="color:var(--accent)">package.json에 prebuild: pnpm compile-prompts 등록</strong></li>
+          <li>ESLint + Prettier + 스크립트</li>
+          <li>.env.local · .env.example</li>
+          <li>Vercel 배포 1회 점검</li>
+        </ul>
+      </div>
+
+      <!-- 1-B 단계: 시각 회귀 인프라 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">1-B단계 · <span style="color:var(--accent)">시각 회귀 인프라</span> (UI 첫 라우트 셸 직후)</div>
+          <div class="phase-meta">0/9 · 예정</div>
+        </div>
+        <ul class="checklist">
+          <li>@playwright/test 설치</li>
+          <li>playwright.config.ts (chromium 1280×800, snapshotPathTemplate, webServer: pnpm dev)</li>
+          <li>e2e/visual/ 디렉토리 + README.md (02_voca 미러링)</li>
+          <li>e2e/visual/routes.spec.ts — 빈 셸 / 1건 우선 캡처</li>
+          <li>package.json 스크립트 (test:visual / :update / :report)</li>
+          <li>.github/workflows/visual-regression.yml (compare/accept 2모드 + 인라인 diff 코멘트)</li>
+          <li>.github/workflows/archive-vr-diffs.yml (머지 후 __diff_archive__/pr-N/ 보존)</li>
+          <li>GitHub 라벨 <code>accept-baseline</code> 생성</li>
+          <li>첫 베이스라인 등록 PR — 라벨 → CI 자동 commit 1회 검증</li>
+        </ul>
+      </div>
+
+      <!-- 2단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">2단계 · 핵심 기능 구현</div>
+          <div class="phase-meta">0/13 · 예정</div>
+        </div>
+        <ul class="checklist">
+          <li>톤별 시스템 프롬프트 3종 (casual / reflective / traditional)</li>
+          <li>lib/claude.ts — SDK 래퍼 + 프롬프트 캐싱 + SSE</li>
+          <li>lib/safety.ts — 위기 신호 분류 (Haiku 4.5)</li>
+          <li>app/api/interpret/route.ts — 엔드포인트</li>
+          <li>lib/db.ts — IndexedDB CRUD (LRU 100건)</li>
+          <li>components/DreamInput.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Form)</span></li>
+          <li>components/ToneChips.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab ToggleGroup single)</span></li>
+          <li>components/InterpretationView.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Progress)</span></li>
+          <li>components/SafetyResourceCard.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Dialog + tel:)</span></li>
+          <li>components/HistoryList.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Separator)</span></li>
+          <li>app/page.tsx — 홈</li>
+          <li>app/result/[id]/page.tsx — 결과</li>
+          <li>app/history/page.tsx — 히스토리</li>
+        </ul>
+      </div>
+
+      <!-- 2-B 단계: 시각 회귀 spec 확장 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">2-B단계 · <span style="color:var(--accent)">시각 회귀 spec 확장</span> (컴포넌트 추가와 병행)</div>
+          <div class="phase-meta">0/4 · 예정</div>
+        </div>
+        <ul class="checklist">
+          <li>routes.spec.ts — /, /result/[id], /history 3개 라우트 (LLM 응답은 page.route mocked SSE)</li>
+          <li>components.spec.ts — ToneChips 3톤 / SafetyResourceCard 자해 분기 / InterpretationView 스트리밍·완료</li>
+          <li>비결정 차단 fixture — addInitScript로 IndexedDB 초기화 + crypto.randomUUID 시드 고정</li>
+          <li>새 컴포넌트 머지 시마다 accept-baseline 라벨로 베이스라인 등록</li>
+        </ul>
+      </div>
+
+      <!-- 3단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">3단계 · 안정화</div>
+          <div class="phase-meta">0/7 · 예정</div>
+        </div>
+        <ul class="checklist">
+          <li>ErrorBoundary + API 실패 UI</li>
+          <li>오프라인 안내 UI</li>
+          <li>안전 분류기 시뮬레이션 테스트</li>
+          <li>톤별 응답 품질 점검</li>
+          <li>모바일 360px / 데스크탑 1280px 렌더 점검 (수동)</li>
+          <li>Lighthouse PWA 점수 90+</li>
+          <li>시각 회귀 베이스라인 전체 한 번 갱신 (디자인 무드 확정 후)</li>
+        </ul>
+      </div>
+
+      <!-- 4단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">4단계 · 배포</div>
+          <div class="phase-meta">0/4 · 예정</div>
+        </div>
+        <ul class="checklist">
+          <li>Vercel 프로덕션 배포</li>
+          <li>OG 이미지 · SEO 메타</li>
+          <li>지인 5명 베타 테스트</li>
+          <li>피드백 수렴 → v1.1 계획</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 다음 할 일 -->
+    <section>
+      <h2>지금 다음에 할 일</h2>
+      <div class="next-list">
+        <ol>
+          <li>이 기획서를 검토하고 수정·추가 의견 알려주기</li>
+          <li>승인 → git 커밋</li>
+          <li>writing-plans 스킬로 구현 계획서 작성 단계 진입</li>
+          <li>1단계 · 프로젝트 초기화 시작</li>
+        </ol>
+      </div>
+    </section>
+
+    <footer>
+      <p>
+        이 페이지는 작업 진행에 따라 자동 갱신됩니다.<br>
+        원본 마크다운: <code>docs/superpowers/specs/2026-05-16-dream-app-design.md</code><br>
+        진행판: <code>docs/superpowers/specs/2026-05-16-dream-app-todo.md</code>
+      </p>
+    </footer>
+
+  </div>
+</body>
+</html>
