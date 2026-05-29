@@ -1,0 +1,55 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--gugbab-space-6, 24px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gugbab-space-5, 20px);
+  min-height: 90vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back {
+  color: var(--gugbab-color-accent-base, #0090ff);
+  text-decoration: none;
+}
+
+.toneBadge {
+  font-size: 12px;
+  padding: 2px var(--gugbab-space-2, 8px);
+  background: var(--gugbab-color-accent-subtle, #e6f4fe);
+  color: var(--gugbab-color-accent-base, #0090ff);
+  border-radius: 999px;
+}
+
+.dreamSummary {
+  padding: var(--gugbab-space-3, 12px);
+  background: var(--gugbab-color-bg-inset, #f0f0f3);
+  border-radius: var(--gugbab-radius-md, 4px);
+}
+
+.summaryTitle {
+  font-size: 12px;
+  margin: 0 0 var(--gugbab-space-1, 4px) 0;
+  color: var(--gugbab-color-fg-muted, #80838d);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summaryBody {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--gugbab-color-fg-secondary, #60646c);
+  font-size: 14px;
+}
+
+.error {
+  text-align: center;
+  color: var(--gugbab-color-danger-base, #e5484d);
+  padding: var(--gugbab-space-8, 32px);
+}

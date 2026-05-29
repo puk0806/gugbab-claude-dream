@@ -1,0 +1,10 @@
+.root {
+  display: flex;
+  gap: var(--gugbab-space-2, 8px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.item {
+  padding: var(--gugbab-space-2, 8px) var(--gugbab-space-4, 16px);
+}
