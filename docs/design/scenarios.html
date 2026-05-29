@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>꿈해몽 PWA — 사용자 시나리오</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0a1e;
+    --bg-grad: linear-gradient(135deg, #0f0a1e 0%, #160d2e 100%);
+    --panel: #1a1430;
+    --panel-2: #221a3d;
+    --text: #e8e4f3;
+    --muted: #a39bbf;
+    --faint: #6b6485;
+    --accent: #a78bfa;
+    --accent-2: #ec4899;
+    --accent-strong: #8b5cf6;
+    --good: #6ee7b7;
+    --warn: #fcd34d;
+    --danger: #fca5a5;
+    --border: #2d2348;
+
+    --phone-bg: #fcfcfd;
+    --phone-surface: #f9f9fb;
+    --phone-inset: #f0f0f3;
+    --phone-elevated: #fcfcfd;
+    --phone-text: #1c2024;
+    --phone-secondary: #60646c;
+    --phone-muted: #80838d;
+    --phone-border: #cdced6;
+    --primary: #0090ff;
+    --primary-bg: #e6f4fe;
+  }
+  html, body {
+    height: 100%; width: 100%;
+    background: var(--bg-grad); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  .deck {
+    height: 100vh; width: 100vw;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    padding: 32px 48px 80px 48px;
+    flex-direction: column;
+    overflow: auto;
+  }
+  .slide.active { display: flex; }
+
+  .slide-header {
+    display: flex; align-items: baseline; gap: 16px;
+    margin-bottom: 8px;
+  }
+  .slide-num {
+    color: var(--muted); font-size: 14px; letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+  .slide h1 {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+  }
+  .slide h2 {
+    font-size: 18px; color: var(--muted); font-weight: 500;
+    margin-top: 4px; margin-bottom: 24px;
+  }
+
+  .meta-row {
+    display: flex; gap: 12px; margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .meta-row .chip {
+    background: var(--panel); padding: 6px 12px; border-radius: 6px;
+    font-size: 13px; color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .meta-row .chip strong { color: var(--text); margin-right: 8px; }
+
+  .flow {
+    display: flex; align-items: center; gap: 12px;
+    overflow-x: auto;
+    padding: 12px 4px 24px 4px;
+    flex: 1;
+  }
+  .step {
+    flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px;
+  }
+  .step-label {
+    font-size: 11px; color: var(--muted);
+    text-align: center; max-width: 220px; line-height: 1.4;
+  }
+  .step-label strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 12px; }
+
+  .arrow {
+    flex-shrink: 0;
+    color: var(--accent); font-size: 22px; padding: 0 4px;
+    align-self: center; margin-bottom: 28px;
+  }
+
+  /* Phone mockup */
+  .phone {
+    width: 220px; height: 420px;
+    background: var(--phone-bg);
+    border: 8px solid #2a2238;
+    border-radius: 28px;
+    padding: 14px 12px;
+    color: var(--phone-text);
+    font-size: 11px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .phone-status {
+    display: flex; justify-content: space-between;
+    font-size: 9px; color: var(--phone-muted);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .phone-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--phone-text);
+  }
+  .phone-header.back { font-size: 11px; font-weight: 500; color: var(--primary); }
+  .phone-content { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+
+  /* 홈: title + subtitle */
+  .home-title {
+    font-size: 20px; font-weight: 700; text-align: center; margin-top: 8px;
+    color: var(--phone-text);
+  }
+  .home-subtitle {
+    font-size: 9px; color: var(--phone-secondary); text-align: center;
+    line-height: 1.5;
+  }
+
+  /* DreamInput */
+  .textarea {
+    background: var(--phone-surface);
+    border: 1px solid var(--phone-border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 9px;
+    color: var(--phone-text);
+    min-height: 48px;
+    line-height: 1.4;
+  }
+  .textarea.empty { color: var(--phone-muted); font-style: italic; }
+  .counter {
+    text-align: right; font-size: 8px; color: var(--phone-muted);
+  }
+
+  /* ToneChips */
+  .tone-chips {
+    display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;
+  }
+  .tone-chip {
+    padding: 4px 8px; border-radius: 999px;
+    font-size: 9px; font-weight: 500;
+    background: var(--phone-surface);
+    color: var(--phone-secondary);
+    border: 1px solid var(--phone-border);
+  }
+  .tone-chip.active {
+    background: var(--primary-bg);
+    color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 700;
+  }
+
+  .submit-btn {
+    padding: 8px 12px; border-radius: 4px;
+    background: var(--primary); color: white;
+    font-size: 10px; font-weight: 600;
+    text-align: center; border: none;
+    margin-top: 4px;
+  }
+  .submit-btn.disabled { opacity: 0.5; }
+
+  /* Section title (recent / history) */
+  .section-title {
+    font-size: 8px; color: var(--phone-muted);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-top: 8px; margin-bottom: 2px;
+  }
+
+  /* HistoryList item */
+  .history-item {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--phone-inset);
+    display: flex; gap: 6px;
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-item-main { flex: 1; }
+  .history-meta {
+    display: flex; gap: 4px; align-items: center; font-size: 8px;
+  }
+  .history-date { color: var(--phone-muted); }
+  .tone-badge {
+    background: var(--primary-bg); color: var(--primary);
+    padding: 1px 4px; border-radius: 999px;
+    font-size: 7px; font-weight: 600;
+  }
+  .history-preview {
+    font-size: 9px; color: var(--phone-text);
+    margin-top: 2px; line-height: 1.4;
+  }
+  .delete-btn {
+    background: transparent; border: 1px solid var(--phone-border);
+    border-radius: 3px; padding: 2px 5px;
+    font-size: 8px; color: var(--phone-secondary);
+    align-self: flex-start;
+  }
+  .clear-all-btn {
+    background: transparent; border: 1px solid var(--danger);
+    color: #c33; padding: 2px 6px;
+    border-radius: 3px; font-size: 8px;
+  }
+
+  /* Result page elements */
+  .dream-summary {
+    padding: 6px 8px; background: var(--phone-inset);
+    border-radius: 4px;
+  }
+  .dream-summary .label {
+    font-size: 7px; color: var(--phone-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .dream-summary .body {
+    font-size: 9px; color: var(--phone-secondary); line-height: 1.5;
+  }
+  .interpretation {
+    font-size: 9px; line-height: 1.6; color: var(--phone-text);
+    white-space: pre-wrap;
+    flex: 1;
+    overflow: auto;
+  }
+  .interpretation h3 {
+    font-size: 10px; font-weight: 700;
+    margin-top: 6px; margin-bottom: 2px;
+    color: var(--phone-text);
+  }
+  .interpretation .h2-md {
+    font-size: 11px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .caret {
+    display: inline-block; color: var(--primary);
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink { to { opacity: 0; } }
+
+  .loading {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px;
+  }
+  .loading .spinner {
+    width: 80px; height: 3px;
+    background: var(--phone-inset); border-radius: 2px;
+    overflow: hidden; position: relative;
+  }
+  .loading .spinner::before {
+    content: ""; position: absolute; left: 0; top: 0;
+    width: 30%; height: 100%; background: var(--primary);
+    animation: slide 1.5s infinite;
+  }
+  @keyframes slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+  }
+  .loading-text { font-size: 9px; color: var(--phone-muted); }
+
+  /* SafetyResourceCard */
+  .safety-card {
+    background: var(--phone-elevated);
+    border: 1px solid var(--phone-border);
+    border-radius: 4px;
+    padding: 10px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .safety-title {
+    font-size: 11px; font-weight: 700;
+    color: var(--phone-text);
+  }
+  .safety-lead {
+    font-size: 9px; color: var(--phone-secondary); line-height: 1.5;
+  }
+  .crisis-item {
+    display: flex; gap: 6px; align-items: center;
+  }
+  .crisis-phone {
+    font-size: 11px; font-weight: 700;
+    color: var(--primary);
+    padding: 3px 6px;
+    background: var(--primary-bg);
+    border-radius: 3px;
+    min-width: 60px; text-align: center;
+  }
+  .crisis-meta { display: flex; flex-direction: column; }
+  .crisis-name { font-size: 9px; font-weight: 600; color: var(--phone-text); }
+  .crisis-desc { font-size: 7px; color: var(--phone-muted); }
+
+  /* Empty state */
+  .empty {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--phone-muted); text-align: center;
+  }
+
+  /* Toast (PWA install 등) */
+  .toast {
+    position: absolute; bottom: 14px; left: 14px; right: 14px;
+    background: #1a1430; color: white; font-size: 8px;
+    padding: 6px 8px; border-radius: 4px;
+    text-align: center;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 20px;
+  }
+  .modal {
+    background: white; border-radius: 6px; padding: 10px 8px;
+    width: 80%; font-size: 9px; text-align: center;
+    color: var(--phone-text);
+  }
+  .modal h4 { font-size: 10px; margin-bottom: 4px; }
+  .modal p { font-size: 8px; color: var(--phone-muted); margin-bottom: 8px; }
+  .modal .btn-row { display: flex; gap: 4px; }
+  .modal .btn {
+    flex: 1; padding: 4px; border-radius: 3px;
+    font-size: 9px; font-weight: 600; border: none;
+  }
+  .modal .btn.confirm { background: var(--danger); color: white; }
+  .modal .btn.cancel { background: var(--phone-inset); color: var(--phone-secondary); }
+
+  /* Error banner (예외) */
+  .error-banner {
+    padding: 8px; border-radius: 4px;
+    background: #fee2e2; color: #b91c1c;
+    font-size: 9px; line-height: 1.5;
+    border: 1px solid #fca5a5;
+  }
+
+  /* Network status badge */
+  .offline-badge {
+    display: inline-block; padding: 2px 6px;
+    background: #fef3c7; color: #92400e;
+    font-size: 8px; font-weight: 600;
+    border-radius: 999px;
+  }
+
+  /* SSE event flow (시각화용) */
+  .sse-events {
+    display: flex; flex-direction: column; gap: 4px;
+    background: var(--phone-inset); padding: 6px;
+    border-radius: 4px; font-family: monospace; font-size: 7px;
+  }
+  .sse-events div { color: var(--phone-secondary); }
+  .sse-events div.highlight { color: var(--primary); font-weight: 700; }
+
+  /* Nav */
+  .nav {
+    position: fixed; bottom: 16px; left: 0; right: 0;
+    display: flex; justify-content: center; align-items: center; gap: 16px;
+    z-index: 10;
+  }
+  .nav button {
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 16px; border-radius: 6px; font-size: 13px;
+    cursor: pointer;
+  }
+  .nav button:hover { background: var(--panel-2); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav .indicator {
+    color: var(--muted); font-size: 13px; min-width: 80px; text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Cover */
+  .cover {
+    text-align: center; max-width: 760px; margin: auto;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .cover h1 {
+    font-size: 56px; font-weight: 800; letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .cover p { font-size: 18px; color: var(--muted); }
+  .cover .toc {
+    margin-top: 24px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+    text-align: left;
+  }
+  .cover .toc div {
+    background: var(--panel); padding: 12px 16px; border-radius: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .cover .toc div strong { display: block; margin-bottom: 4px; color: var(--text); }
+  .cover .toc div span { color: var(--muted); font-size: 13px; }
+  .cover .hint {
+    margin-top: 16px; color: var(--muted); font-size: 13px;
+  }
+  .cover .hint kbd {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
+    padding: 2px 8px; font-family: monospace; font-size: 12px;
+  }
+
+  .footer-note {
+    text-align: center; color: var(--muted); font-size: 12px;
+    margin-top: 8px; padding: 0 24px;
+  }
+  .footer-note strong { color: var(--text); }
+  .footer-note .accent { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ========== Cover ========== -->
+  <section class="slide active" data-slide="0">
+    <div class="cover" style="margin: auto;">
+      <h1>꿈해몽 PWA</h1>
+      <p>어젯밤 꿈을 적고 톤을 골라 누르면 Claude가 해석해주는 PWA — 사용자 시나리오 시각화</p>
+      <div class="toc">
+        <div><strong>S1.</strong><span>첫 방문 → 자기 성찰 톤 해몽</span></div>
+        <div><strong>S2.</strong><span>한국 전통 톤 — 길몽/흉몽 라벨</span></div>
+        <div><strong>S3.</strong><span>캐주얼 톤 — 가벼운 위트</span></div>
+        <div><strong>S4.</strong><span>자해 신호 감지 → 위기 자원 카드</span></div>
+        <div><strong>S5.</strong><span>히스토리 회상 — 과거 해몽 다시 보기</span></div>
+        <div><strong>S6.</strong><span>히스토리 정리 — 단건 / 전체 삭제</span></div>
+        <div><strong>S7.</strong><span>PWA 설치 + 오프라인 안내</span></div>
+        <div><strong>+</strong><span>예외 — API 키 누락 / 5xx / IDB 차단</span></div>
+      </div>
+      <div class="hint">
+        <kbd>←</kbd> <kbd>→</kbd> 키 또는 하단 버튼으로 슬라이드 이동
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== S1: 첫 방문 → 자기 성찰 톤 ========== -->
+  <section class="slide" data-slide="1">
+    <div class="slide-header">
+      <span class="slide-num">S1 / 8</span>
+      <h1>첫 방문 → 자기 성찰 톤 해몽</h1>
+    </div>
+    <h2>홈 진입 → 꿈 입력 → 자기 성찰(기본값) → SSE 스트리밍 → 결과 저장</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>페르소나</strong>밤에 이상한 꿈을 꾼 사용자</div>
+      <div class="chip"><strong>장소</strong>침대 / 모바일 Safari</div>
+      <div class="chip"><strong>관련 자산</strong>jung-freud · korean-tradition · synthesizer agent</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 홈 첫 진입 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:14 AM</span><span>📶 100%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="home-subtitle">어젯밤 꿈을 적고 톤을 골라<br>누르면 Claude가 해석해드려요.</div>
+            <div class="textarea empty">어젯밤 꿈을 적어보세요</div>
+            <div class="counter">0/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn disabled">해석하기</button>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 홈 첫 진입</strong>빈 textarea · 기본 톤 "자기 성찰" · 버튼 비활성</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: 꿈 입력 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:15 AM</span><span>📶 100%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="home-subtitle">어젯밤 꿈을 적고 톤을 골라<br>누르면 Claude가 해석해드려요.</div>
+            <div class="textarea">맑은 강에서 큰 물고기를 잡았어요. 손에서 미끄러질 듯하다가 결국 두 손으로 꽉 안았어요.</div>
+            <div class="counter">52/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn">해석하기</button>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 꿈 입력</strong>글자수 카운터 증가 · 버튼 활성</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 로딩 (SSE 첫 chunk 전) -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:15 AM</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">맑은 강에서 큰 물고기를 잡았어요...</div>
+            </div>
+            <div class="loading">
+              <div class="spinner"></div>
+              <div class="loading-text">꿈을 풀어보는 중...</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. 결과 페이지 진입</strong>새 ULID로 IDB 저장 후 라우팅 · /api/interpret 호출 · Haiku 안전 분류 대기</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 4: SSE 스트리밍 (부분) -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:15 AM</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">맑은 강에서 큰 물고기를 잡았어요...</div>
+            </div>
+            <div class="interpretation">
+              <div class="h2-md">자기 안의 풍요</div>
+              <h3>한국 전통 관점</h3>
+              물고기를 손에 쥐는 꿈은 전통적으로 재물·기회의 신호로 풀<span class="caret">▍</span>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>4. SSE 스트리밍 시작</strong>chunk 누적 렌더 · 깜빡이 캐럿 · "자기 성찰" 톤이라 3관점 섹션 + 질문 3개 형식</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 5: 완료 + IDB 저장 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:16 AM</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">맑은 강에서 큰 물고기를 잡았어요...</div>
+            </div>
+            <div class="interpretation">
+              <div class="h2-md">자기 안의 풍요</div>
+              <h3>융 분석심리학 관점</h3>
+              자기(self)의 통합 신호로 보입니다. 두 손으로 안은 행위는…
+
+              <h3>나에게 묻는 질문 3개</h3>
+              1. 최근 어떤 결정을 미루고 있나요?
+              2. 누구의 인정을 가장 원하나요?
+              3. 이 꿈이 사라진다면 가장 그리울 것은?
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>5. done 이벤트</strong>전체 텍스트 + modelId + verdict 합쳐 IDB 갱신 저장 · 새로고침 시 재호출 X</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 <strong>핵심 흐름</strong>: ULID 미리 발급 → 빈 entry IDB 저장 → 결과 페이지에서 SSE 누적 → done 이벤트에 전체 텍스트 합쳐 IDB 갱신.
+      <span class="accent">자기 성찰 톤</span>은 system prompt에 jung-freud · korean-tradition · attachment-theory · synthesizer agent 5개 자산을 한 번에 임베드 (2,000~3,500 토큰, 프롬프트 캐싱 적용).
+    </div>
+  </section>
+
+  <!-- ========== S2: 한국 전통 톤 ========== -->
+  <section class="slide" data-slide="2">
+    <div class="slide-header">
+      <span class="slide-num">S2 / 8</span>
+      <h1>한국 전통 톤 — 길몽/흉몽 라벨</h1>
+    </div>
+    <h2>같은 꿈을 다시 → 톤 칩에서 "한국 전통" 선택 → 길몽 라벨 + 상징별 의미</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>관련 자산</strong>korean-dream-interpretation-tradition</div>
+      <div class="chip"><strong>출력 형식</strong>한 줄 요약 (길몽/흉몽/중립) + 상징 섹션 + 종합</div>
+      <div class="chip"><strong>회피</strong>강한 길흉 단정 금지</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 홈에서 톤 변경 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:17 AM</span><span>📶 100%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="textarea">맑은 강에서 큰 물고기를 잡았어요...</div>
+            <div class="counter">52/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip">자기 성찰</div>
+              <div class="tone-chip active">한국 전통</div>
+            </div>
+            <button class="submit-btn">해석하기</button>
+            <div class="section-title">최근 해몽</div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta">
+                  <span class="history-date">2026-05-24</span>
+                  <span class="tone-badge">자기 성찰</span>
+                </div>
+                <div class="history-preview">맑은 강에서 큰 물고기를 잡았어요...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 톤 변경</strong>같은 입력 유지 · "한국 전통" 칩 선택 · 최근 해몽에 S1 결과 1건 표시</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: SSE 진행 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:18 AM</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">한국 전통</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">맑은 강에서 큰 물고기를 잡았어요...</div>
+            </div>
+            <div class="interpretation">
+              <div class="h2-md">길몽</div>
+              <h3>등장 상징</h3>
+              - 물고기: 재물·기회를 상징…
+              - 맑은 물: 마음의 정<span class="caret">▍</span>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 스트리밍</strong>상징별 섹션 자동 분리 · "길몽" 라벨 박힘 (단정 표현은 회피)</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 완료 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:18 AM</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">한국 전통</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">맑은 강에서 큰 물고기를 잡았어요...</div>
+            </div>
+            <div class="interpretation">
+              <div class="h2-md">길몽</div>
+              <h3>등장 상징</h3>
+              - 물고기: 재물·기회
+              - 맑은 물: 마음의 정화
+              - 두 손으로 안음: 의지·집착
+
+              종합하면 전통적으로 길몽으로 풀이됩니다. 다만 미끄러질 뻔한 장면은 결정의 망설임을 시사합니다.
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. done</strong>400~600자 분량 · 옛스러운 문어체 허용 · IDB에 별도 entry로 저장</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 같은 꿈이라도 톤을 바꾸면 <strong>다른 entry</strong>로 저장됨. 사용자는 톤별로 비교 가능. 시스템 프롬프트는 톤마다 다르고 <span class="accent">프롬프트 캐싱</span>으로 두 번째 호출부터 input 비용 ↓.
+    </div>
+  </section>
+
+  <!-- ========== S3: 캐주얼 톤 ========== -->
+  <section class="slide" data-slide="3">
+    <div class="slide-header">
+      <span class="slide-num">S3 / 8</span>
+      <h1>캐주얼 톤 — 가벼운 위트</h1>
+    </div>
+    <h2>친근 존댓말 · 250~400자 · 이모지 0~1개 허용</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>특징</strong>가장 짧고 친근</div>
+      <div class="chip"><strong>토큰</strong>200~400 (가장 작은 system)</div>
+      <div class="chip"><strong>출력 형식</strong>요약 + 짧은 본문 + 위트 마무리</div>
+    </div>
+
+    <div class="flow">
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 1:32</span><span>📶 86%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="textarea">이가 하나 빠지는 꿈을 꿨어요. 손바닥에 놓고 보니 별로 안 아팠어요.</div>
+            <div class="counter">38/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip active">캐주얼</div>
+              <div class="tone-chip">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn">해석하기</button>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 짧은 꿈 + 캐주얼</strong>점심 시간 잠깐 풀어보기</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 1:33</span><span>📶 86%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">캐주얼</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">이가 하나 빠지는 꿈을 꿨어요...</div>
+            </div>
+            <div class="interpretation">
+              <div class="h2-md">작은 변화의 사인 ✨</div>
+              요즘 새로운 시작을 앞두고 있나요? 이가 빠지는 꿈은 변화의 신호로 자주 등장해요. 아프지 않았다는 게 포인트 — 마음 어딘가는 이미 받아들이고 있는 것 같아요.
+
+              내일 거울 한 번 보고 웃어보세요. 잘 있어요!
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 짧은 위트 마무리</strong>존댓말 유지 · 가벼운 이모지 1개 · 단정 X</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 캐주얼 톤은 <strong>가장 짧고 빠른 응답</strong>. 자기 성찰 톤과 달리 다관점 분석이나 자기 성찰 질문 없음. 점심·이동 중 가볍게 보기 용도.
+    </div>
+  </section>
+
+  <!-- ========== S4: 자해 신호 감지 ========== -->
+  <section class="slide" data-slide="4">
+    <div class="slide-header">
+      <span class="slide-num">S4 / 8</span>
+      <h1>자해 신호 감지 → 위기 자원 카드</h1>
+    </div>
+    <h2>Haiku 분류기 → self_harm 판정 → LLM 해몽 차단 → 카드 페이로드 1회</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>관련 자산</strong>dream-safety-classifier agent · crisis-resources-korea</div>
+      <div class="chip"><strong>보수 분기</strong>confidence &lt; 0.6 → safety 카드</div>
+      <div class="chip"><strong>응답</strong>본문 재노출 ❌ (재트라우마 방지)</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 위기 신호 입력 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오전 3:08</span><span>📶 100%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="textarea">요즘 자꾸 절벽에서 뛰어내리는 꿈을 꿔요. 깨고 나면 진짜로 그러고 싶기도 해요.</div>
+            <div class="counter">48/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn">해석하기</button>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 위기 신호 포함 입력</strong>"진짜로 그러고 싶다" 직접 표현</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: 서버 SSE 흐름 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오전 3:08</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="sse-events">
+              <div>POST /api/interpret</div>
+              <div>→ Zod 검증 OK</div>
+              <div>→ Haiku 분류 호출</div>
+              <div class="highlight">{ category: "self_harm", confidence: 0.95 }</div>
+              <div>→ isSafe(verdict) === false</div>
+              <div class="highlight">data: {"type":"safety_block",...}</div>
+              <div>→ stream close (LLM 호출 X)</div>
+            </div>
+            <div class="loading-text" style="text-align:center;">위 흐름은 디버깅용 표시 — 실제 UI는 안전 카드만</div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 서버 내부</strong>분류 → safety_block 1회 → close. <strong>해몽 LLM 호출 안 함</strong></div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 안전 카드 렌더 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오전 3:08</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="safety-card">
+              <div class="safety-title">도움이 필요하시면<br>연락해보세요</div>
+              <div class="safety-lead">지금 마음이 무거우시군요. 혼자가 아니에요.</div>
+              <div class="crisis-item">
+                <a class="crisis-phone">109</a>
+                <div class="crisis-meta">
+                  <span class="crisis-name">자살예방상담전화</span>
+                  <span class="crisis-desc">24시간 · 전화/문자</span>
+                </div>
+              </div>
+              <div class="crisis-item">
+                <a class="crisis-phone">1577-0199</a>
+                <div class="crisis-meta">
+                  <span class="crisis-name">정신건강위기상담전화</span>
+                  <span class="crisis-desc">24시간</span>
+                </div>
+              </div>
+              <div class="crisis-item">
+                <a class="crisis-phone">1388</a>
+                <div class="crisis-meta">
+                  <span class="crisis-name">청소년상담전화</span>
+                  <span class="crisis-desc">익명 가능</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. SafetyResourceCard</strong>꿈 본문 재노출 X · <code>tel:</code> 링크 탭하면 바로 통화</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 <strong>안전 정책은 톤을 우회하지 않음</strong>. 캐주얼 톤이라도 위기 신호는 동일하게 차단. 분류기가 timeout/5xx로 실패해도 <span class="accent">보수적 분기</span>로 안전 카드 표시.
+    </div>
+  </section>
+
+  <!-- ========== S5: 히스토리 회상 ========== -->
+  <section class="slide" data-slide="5">
+    <div class="slide-header">
+      <span class="slide-num">S5 / 8</span>
+      <h1>히스토리 회상 — 과거 해몽 다시 보기</h1>
+    </div>
+    <h2>/history 진입 → 100건 리스트 → 클릭 → 캐싱된 결과 즉시 표시 (재호출 X)</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>스토리지</strong>IndexedDB <code>gugbab-dream</code> v1</div>
+      <div class="chip"><strong>인덱스</strong>createdAt_idx (역순 정렬)</div>
+      <div class="chip"><strong>LRU</strong>100건 초과 시 가장 오래된 자동 삭제</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 홈 (하단 link 없음 — 명시적 진입은 별도 라우트) -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 9:12</span><span>📶 78%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="textarea empty">어젯밤 꿈을 적어보세요</div>
+            <div class="counter">0/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn disabled">해석하기</button>
+            <div class="section-title">최근 해몽</div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-24</span><span class="tone-badge">한국 전통</span></div>
+                <div class="history-preview">맑은 강에서 큰 물고기를 잡았어요...</div>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-24</span><span class="tone-badge">자기 성찰</span></div>
+                <div class="history-preview">맑은 강에서 큰 물고기를 잡았어요...</div>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-23</span><span class="tone-badge">캐주얼</span></div>
+                <div class="history-preview">이가 하나 빠지는 꿈을 꿨어요...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 홈 — 최근 3건 미리보기</strong>가장 자주 쓰는 진입점. 더 보려면 /history</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: /history 진입 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 9:12</span><span>📶 78%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span style="font-size:13px;color:var(--phone-text);font-weight:700;">히스토리</span></div>
+          <div class="phone-content">
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-24</span><span class="tone-badge">한국 전통</span></div>
+                <div class="history-preview">맑은 강에서 큰 물고기를 잡았어요...</div>
+              </div>
+              <button class="delete-btn">삭제</button>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-24</span><span class="tone-badge">자기 성찰</span></div>
+                <div class="history-preview">맑은 강에서 큰 물고기를 잡았어요...</div>
+              </div>
+              <button class="delete-btn">삭제</button>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-23</span><span class="tone-badge">캐주얼</span></div>
+                <div class="history-preview">이가 하나 빠지는 꿈을 꿨어요...</div>
+              </div>
+              <button class="delete-btn">삭제</button>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-22</span><span class="tone-badge">자기 성찰</span></div>
+                <div class="history-preview">바다 한가운데서 누군가가 손을 흔들고 있었어요...</div>
+              </div>
+              <button class="delete-btn">삭제</button>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. /history 진입</strong>100건까지 · 각 항목 삭제 버튼 · 우상단 전체 삭제 (3건 이상일 때)</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 클릭 → 결과 즉시 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 9:13</span><span>📶 78%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">캐주얼</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">이가 하나 빠지는 꿈을 꿨어요...</div>
+            </div>
+            <div class="interpretation">
+              <div class="h2-md">작은 변화의 사인 ✨</div>
+              요즘 새로운 시작을 앞두고 있나요? 이가 빠지는 꿈은 변화의 신호로 자주 등장해요...
+
+              내일 거울 한 번 보고 웃어보세요. 잘 있어요!
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. 과거 결과 즉시 표시</strong>IDB에 <code>interpretation</code> 저장됨 → fetch 없음 · 0초 렌더</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 entry는 <code>id</code>(ULID), <code>createdAt</code>(역순 인덱스), <code>dreamText</code>, <code>tone</code>, <code>interpretation</code>(완료된 본문), <code>safetyVerdict</code>, <code>modelId</code>, <code>schemaVersion: 1</code>로 구성. <strong>꿈 본문은 서버에 절대 저장 안 됨</strong>.
+    </div>
+  </section>
+
+  <!-- ========== S6: 히스토리 정리 ========== -->
+  <section class="slide" data-slide="6">
+    <div class="slide-header">
+      <span class="slide-num">S6 / 8</span>
+      <h1>히스토리 정리 — 단건 / 전체 삭제</h1>
+    </div>
+    <h2>삭제 버튼 → 즉시 제거 · 전체 삭제 → confirm 모달 → clear all</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>DB API</strong>db.deleteEntry(id) / db.clearAll()</div>
+      <div class="chip"><strong>UX</strong>단건 삭제는 즉시 · 전체 삭제는 confirm</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 삭제 버튼 클릭 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 11:04</span><span>📶 62%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span style="font-size:13px;color:var(--phone-text);font-weight:700;">히스토리</span><button class="clear-all-btn">전체 삭제</button></div>
+          <div class="phone-content">
+            <div class="history-item" style="background:#fef2f2;border-radius:4px;padding:6px;">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-23</span><span class="tone-badge">캐주얼</span></div>
+                <div class="history-preview">이가 하나 빠지는 꿈을 꿨어요...</div>
+              </div>
+              <button class="delete-btn" style="border-color:var(--danger);color:#c33;">삭제</button>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-22</span><span class="tone-badge">자기 성찰</span></div>
+                <div class="history-preview">바다 한가운데서 누군가가 손을 흔들고...</div>
+              </div>
+              <button class="delete-btn">삭제</button>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 단건 삭제 호버</strong>붉은 배경 hint · 클릭 시 즉시 제거 (confirm 없음)</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: 전체 삭제 confirm -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 11:05</span><span>📶 62%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span style="font-size:13px;color:var(--phone-text);font-weight:700;">히스토리</span><button class="clear-all-btn">전체 삭제</button></div>
+          <div class="phone-content">
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-22</span><span class="tone-badge">자기 성찰</span></div>
+                <div class="history-preview">바다 한가운데서 누군가가 손을...</div>
+              </div>
+              <button class="delete-btn">삭제</button>
+            </div>
+          </div>
+          <div class="modal-overlay">
+            <div class="modal">
+              <h4>모든 히스토리를<br>삭제할까요?</h4>
+              <p>되돌릴 수 없어요.</p>
+              <div class="btn-row">
+                <button class="btn cancel">취소</button>
+                <button class="btn confirm">삭제</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 전체 삭제 confirm</strong><code>window.confirm</code> 모달 · 되돌릴 수 없음 경고</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 빈 상태 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 11:05</span><span>📶 62%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span style="font-size:13px;color:var(--phone-text);font-weight:700;">히스토리</span></div>
+          <div class="phone-content">
+            <div class="empty">아직 저장된 해몽이 없어요.</div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. 빈 상태</strong>전체 삭제 버튼도 사라짐 (entries.length === 0)</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 LRU 100건 정책으로 자동 정리되지만 사용자가 명시적으로 정리하고 싶을 때 사용. <strong>모두 클라이언트 IndexedDB 작업</strong>이라 네트워크 없이 즉시 반영.
+    </div>
+  </section>
+
+  <!-- ========== S7: PWA 설치 + 오프라인 ========== -->
+  <section class="slide" data-slide="7">
+    <div class="slide-header">
+      <span class="slide-num">S7 / 8</span>
+      <h1>PWA 설치 + 오프라인 안내</h1>
+    </div>
+    <h2>홈 화면에 추가 → 앱처럼 실행 → 오프라인 진입 시 해몽 불가 안내 + 히스토리는 OK</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>SW</strong>@serwist/next (sw.ts → public/sw.js)</div>
+      <div class="chip"><strong>manifest</strong>standalone · violet theme</div>
+      <div class="chip"><strong>오프라인</strong>앱 셸 + 히스토리 캐싱은 OK · 해몽은 네트워크 필요</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 첫 prod 방문 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 8:30</span><span>📶 92%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="home-subtitle">어젯밤 꿈을 적고 톤을 골라...</div>
+            <div class="textarea empty">어젯밤 꿈을 적어보세요</div>
+            <div class="counter">0/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn disabled">해석하기</button>
+          </div>
+          <div class="toast">홈 화면에 "꿈해몽" 추가하기 → 공유 → 홈 화면에 추가</div>
+        </div>
+        <div class="step-label"><strong>1. 첫 prod 방문</strong>iOS Safari에서 manifest 감지 · 사용자에게 설치 안내</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: 홈 화면 추가 (standalone) -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 8:32</span><span>📶 92%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="home-subtitle">어젯밤 꿈을 적고 톤을 골라...</div>
+            <div class="textarea empty">어젯밤 꿈을 적어보세요</div>
+            <div class="counter">0/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn disabled">해석하기</button>
+            <div class="section-title">설치됨 — standalone</div>
+            <div style="font-size:8px;color:var(--phone-muted);text-align:center;">brower chrome 없이 앱처럼 실행 · violet theme color · apple-touch-icon</div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 홈 화면 아이콘으로 진입</strong>brower chrome 없는 standalone 모드 · 192/512 PNG 아이콘</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 오프라인 진입 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>지하철 · 09:14</span><span>📵 오프라인</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽 <span class="offline-badge">오프라인</span></div>
+            <div class="home-subtitle">지금은 해몽이 어려워요.<br>네트워크 연결 후 다시 시도해주세요.</div>
+            <div class="section-title">저장된 해몽 (오프라인 OK)</div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-24</span><span class="tone-badge">한국 전통</span></div>
+                <div class="history-preview">맑은 강에서 큰 물고기를...</div>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="history-item-main">
+                <div class="history-meta"><span class="history-date">2026-05-23</span><span class="tone-badge">캐주얼</span></div>
+                <div class="history-preview">이가 하나 빠지는 꿈을...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. 오프라인 진입</strong>해몽 입력 폼은 비활성 · <strong>저장된 히스토리는 IDB라 그대로 열람</strong> 가능</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 SW가 앱 셸을 캐싱해 <strong>오프라인 첫 진입도 가능</strong>. 해몽 자체는 Anthropic API 호출이 필요하므로 네트워크 필수.
+      <span class="accent">위 오프라인 UI는 v1.1 항목</span> — Phase 3 안정화에서 구현 예정 (현재는 navigator.onLine 체크 + 토스트만).
+    </div>
+  </section>
+
+  <!-- ========== S+: 예외 ========== -->
+  <section class="slide" data-slide="8">
+    <div class="slide-header">
+      <span class="slide-num">+ / 8</span>
+      <h1>예외 플로우</h1>
+    </div>
+    <h2>API 키 누락 / 분류기 timeout / Anthropic 5xx / IndexedDB 차단</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>원칙</strong>모든 실패는 보수적 → safety 카드 or 안내</div>
+      <div class="chip"><strong>꿈 본문</strong>서버 로그에 절대 미기록</div>
+    </div>
+
+    <div class="flow">
+      <!-- 예외 1: API 키 누락 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>2:14 AM</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">맑은 강에서 큰 물고기를...</div>
+            </div>
+            <div class="sse-events">
+              <div>POST /api/interpret</div>
+              <div>→ Zod 검증 OK</div>
+              <div class="highlight">→ classifySafety: ANTHROPIC_API_KEY missing</div>
+              <div>→ catch (401 Unauthorized)</div>
+              <div class="highlight">→ conservativeVerdict('Unauthorized')</div>
+              <div>→ category: severe_distress, conf: 0</div>
+              <div>→ isSafe === false</div>
+              <div>→ safety_block 페이로드</div>
+            </div>
+            <div class="safety-card" style="margin-top:6px;">
+              <div class="safety-title" style="font-size:9px;">도움이 필요하시면 연락해보세요</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>예외 1. API 키 누락</strong>분류기 401 → 보수적 분기 → safety 카드. <em>(사용자에게 키 입력 안내가 별도 필요)</em></div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- 예외 2: Anthropic 5xx -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 6:42</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span>← 홈으로</span><span class="tone-badge">자기 성찰</span></div>
+          <div class="phone-content">
+            <div class="dream-summary">
+              <div class="label">입력한 꿈</div>
+              <div class="body">사슴이 마당에 들어왔어요...</div>
+            </div>
+            <div class="sse-events">
+              <div>분류 OK (null, 0.9)</div>
+              <div>→ getInterpretStream(reflective)</div>
+              <div class="highlight">→ Anthropic 503 Service Unavailable</div>
+              <div>→ stream error 이벤트</div>
+              <div class="highlight">data: {"type":"error","message":"..."}</div>
+            </div>
+            <div class="error-banner" style="margin-top:6px;">
+              지금 해석이 어려워요. 잠시 후 다시 시도해주세요.
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>예외 2. Anthropic 5xx</strong>스트리밍 중 에러 → error 이벤트 → 사용자 친화 메시지 (스택트레이스 노출 X)</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- 예외 3: IDB 차단 (사파리 시크릿 등) -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 10:14</span><span>📶 100%</span></div>
+          <div class="phone-content">
+            <div class="home-title">꿈해몽</div>
+            <div class="home-subtitle">단발 해몽은 가능하지만<br>히스토리 저장은 불가합니다.</div>
+            <div class="error-banner">
+              브라우저가 로컬 저장소를 차단했어요. 시크릿 모드에서는 히스토리가 저장되지 않습니다.
+            </div>
+            <div class="textarea empty">어젯밤 꿈을 적어보세요</div>
+            <div class="counter">0/2000</div>
+            <div class="tone-chips">
+              <div class="tone-chip">캐주얼</div>
+              <div class="tone-chip active">자기 성찰</div>
+              <div class="tone-chip">한국 전통</div>
+            </div>
+            <button class="submit-btn">해석하기</button>
+          </div>
+        </div>
+        <div class="step-label"><strong>예외 3. IndexedDB 차단</strong>시크릿 모드 등에서 idb open 실패 → 메모리 fallback · 단발 해몽은 가능 · 히스토리만 불가 안내</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 모든 예외에서 <strong>꿈 본문은 서버 로그에 절대 박지 않음</strong> · 에러 메시지에 스택트레이스·내부 경로·모델명 노출 ❌ · <span class="accent">위 예외 처리 UI는 Phase 3에서 정식 구현 예정</span>.
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <button id="prev">← 이전</button>
+  <span class="indicator" id="indicator">0 / 8</span>
+  <button id="next">다음 →</button>
+</nav>
+
+<script>
+  (function() {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const indicator = document.getElementById('indicator');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const total = slides.length - 1; // cover 제외
+
+    let current = 0;
+
+    function show(idx) {
+      const clamped = Math.max(0, Math.min(idx, slides.length - 1));
+      slides.forEach((s, i) => s.classList.toggle('active', i === clamped));
+      current = clamped;
+      indicator.textContent = current === 0 ? `cover · 0 / ${total}` : `S${current === total ? '+' : current} · ${current} / ${total}`;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === slides.length - 1;
+    }
+
+    prevBtn.addEventListener('click', () => show(current - 1));
+    nextBtn.addEventListener('click', () => show(current + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(current - 1);
+      else if (e.key === 'ArrowRight') show(current + 1);
+      else if (e.key === 'Home') show(0);
+      else if (e.key === 'End') show(slides.length - 1);
+    });
+
+    show(0);
+  })();
+</script>
+
+</body>
+</html>
