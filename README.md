@@ -7,7 +7,7 @@
 - **Next.js 16** (App Router) + **React 19** + **TypeScript 5**
 - **PWA**: `@serwist/next`
 - **UI**: `@gugbab/styled-radix` (Radix Themes lookalike 35종) + `@gugbab/tokens` (CSS 변수)
-- **LLM**: Claude Sonnet 4.6 via `@anthropic-ai/sdk` + 프롬프트 캐싱 + SSE
+- **LLM**: Google Gemini 2.5 Flash via `@google/genai` + system instruction + SSE 스트리밍 (무료 한도 일 1,500 req)
 - **로컬 저장**: IndexedDB via `idb`
 - **검증**: `zod` (입력) / `ulid` (ID)
 - **린트·포맷**: Biome (`@gugbab/biome-config` 확장)
@@ -17,7 +17,7 @@
 
 ```bash
 pnpm install
-cp .env.example .env.local  # 그 후 ANTHROPIC_API_KEY 입력
+cp .env.example .env.local  # 그 후 GEMINI_API_KEY 입력 (https://aistudio.google.com/apikey)
 pnpm dev                    # http://localhost:3000
 ```
 

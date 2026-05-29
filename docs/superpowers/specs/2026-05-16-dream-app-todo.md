@@ -52,28 +52,29 @@
 
 ---
 
-## 2단계 — 핵심 기능 구현 (예정)
+## 2단계 — 핵심 기능 구현 (완료)
 
-- [ ] 톤별 시스템 프롬프트 작성 (`lib/prompts/{casual,reflective,traditional}.ts`) — `_compiled/*`에서 흡수한 사용자 자산을 조립
-- [ ] `lib/claude.ts` — Anthropic SDK 래퍼 + 프롬프트 캐싱 + SSE 스트리밍
-- [ ] `lib/safety.ts` — 자해/위기 신호 분류
-- [ ] `app/api/interpret/route.ts` — 엔드포인트 (Zod 검증 → 안전 분류 → Claude 스트리밍)
-- [ ] `lib/db.ts` — IndexedDB CRUD (DreamEntry 저장/조회/삭제)
-- [ ] `components/DreamInput.tsx` — 입력 + 톤 선택 UI (gugbab `Form` 활용)
-- [ ] `components/ToneChips.tsx` — 톤 3종 칩 컴포넌트 (gugbab `ToggleGroup type="single"`)
-- [ ] `components/InterpretationView.tsx` — 스트리밍 결과 렌더 (로딩은 gugbab `Progress`)
-- [ ] `components/SafetyResourceCard.tsx` — 위기 자원 카드 (gugbab `Dialog` + `tel:` 링크)
-- [ ] `components/HistoryList.tsx` — 히스토리 리스트 (gugbab `Separator`)
-- [ ] `app/page.tsx` — 홈 페이지
-- [ ] `app/result/[id]/page.tsx` — 결과 페이지
-- [ ] `app/history/page.tsx` — 히스토리 페이지
+- [x] 톤별 시스템 프롬프트 작성 (`lib/prompts/{casual,reflective,traditional,safety,index}.ts`) — `_compiled/*` 24개 자산 임베드
+- [x] `lib/claude.ts` — Anthropic SDK 래퍼 + 프롬프트 캐싱(ephemeral) + Messages.stream
+- [x] `lib/safety.ts` — Haiku 4.5 분류기 + 3s timeout + 보수적 분기 (confidence < 0.6 → safety 카드)
+- [x] `app/api/interpret/route.ts` — SSE 엔드포인트 (Zod → safety → safety_block/chunk/done/error 4종 이벤트)
+- [x] `lib/db.ts` — IndexedDB(`gugbab-dream` v1) CRUD + LRU 100건 자동 enforce
+- [x] `lib/types.ts` + `lib/crisis-resources.ts` — 공통 타입 + 한국 위기 자원 3종 정적 데이터
+- [x] `components/DreamInput.tsx` — textarea + 2000자 카운터 + 해석하기 버튼
+- [x] `components/ToneChips.tsx` — gugbab `ToggleGroup type="single"` 3종 칩
+- [x] `components/InterpretationView.tsx` — SSE 누적 + 깜빡이 캐럿 + gugbab `Progress` 로딩
+- [x] `components/SafetyResourceCard.tsx` — 위기 자원 카드 + `tel:` 링크
+- [x] `components/HistoryList.tsx` — DreamEntry 리스트 + gugbab `Separator` + 단건 삭제 버튼
+- [x] `app/page.tsx` — 홈 (DreamInput + 최근 3건 미리보기)
+- [x] `app/result/[id]/page.tsx` — 결과 (SSE 클라이언트 + 누적 렌더 + IDB 저장 + safety 분기)
+- [x] `app/history/page.tsx` — 히스토리 (100건 + 단건/전체 삭제)
 
-### 2-B. 시각 회귀 spec 확장 (컴포넌트 추가와 동시에)
+### 2-B. 시각 회귀 spec 확장 (완료)
 
-- [ ] `routes.spec.ts` — `/`, `/result/[id]`, `/history` 3개 라우트 캡처 (LLM 응답은 `page.route`로 mocked SSE 주입)
-- [ ] `components.spec.ts` — `ToneChips`(3톤 각 선택 상태), `SafetyResourceCard`(자해 시뮬레이션 분기), `InterpretationView`(스트리밍 중/완료)
-- [ ] 비결정 차단 fixture — `addInitScript`로 IndexedDB 초기화 + `crypto.randomUUID` 시드 고정
-- [ ] 새 컴포넌트가 머지될 때마다 `accept-baseline` 라벨로 베이스라인 등록
+- [x] `routes.spec.ts` — `/`, `/result/[id]`, `/history` 3개 라우트 캡처 (`page.route` mocked SSE + IDB seed)
+- [x] `components.spec.ts` — ToneChips 3톤 + SafetyResourceCard 자해 분기 (4 spec)
+- [x] `_fixtures/{sse-mock.ts, init-script.ts}` — 비결정 차단: IndexedDB 초기화 + Math.random 시드(42, xorshift32) + crypto.randomUUID 고정 + Date.now freeze(2026-05-22) + tone별 sample 텍스트
+- [ ] 새 컴포넌트가 머지될 때마다 `accept-baseline` 라벨로 베이스라인 등록 *(이번 PR이 첫 일괄 등록)*
 
 ---
 
@@ -111,3 +112,11 @@
 | 2026-05-21 | 0단계 완료. `feature/writing-plan-phase-1` 브랜치에서 `writing-plans` 스킬로 Phase 1 + 1-B 통합 구현 계획서 (`docs/superpowers/plans/2026-05-21-phase-1-bootstrap.md`, 24 task) 산출 |
 | 2026-05-21 | **Phase 1 + 1-B 실제 부트스트랩 실행**: Next.js 16.2.6 + React 19 + TS5 + Biome(Prettier 대체) + @gugbab/* 4종 + @serwist/next + compile-prompts(24개) + Playwright + GH Actions 2종. 사용자 액션 잔여 2건(Vercel 배포 점검, GitHub `accept-baseline` 라벨 + 첫 베이스라인 PR). 본 PR 자체가 첫 베이스라인 PR 역할 |
 | 2026-05-21 | **시각 회귀 머지 게이트 적용**: 레포 Public 전환 + `scripts/setup-branch-protection.sh` 추가 + main 브랜치 보호 적용 (02_voca 미러링: required_status_checks.contexts=[visual-regression], strict=true, allow_force_pushes/deletions=false). 이제 시각 회귀 CI PASS 안 하면 머지 불가 — 시각 변화 시 `accept-baseline` 라벨 흐름 강제 |
+| 2026-05-21 | PR #1 (Phase 1 + 1-B 부트스트랩) **머지 완료**. CI 봇이 home.png 베이스라인 자동 commit + push → main 동기화 |
+| 2026-05-22 | `feature/writing-plan-phase-2` 브랜치에서 Phase 2 + 2-B 통합 구현 계획서 (`docs/superpowers/plans/2026-05-22-phase-2-core-features.md`, 23 task) 산출. 톤 프롬프트 3종 + Haiku 안전 분류기 + SSE API + IndexedDB CRUD + 컴포넌트 5종 + 라우트 3종 + 시각 회귀 spec 확장 (routes 3 + components 4 + SSE mock fixture + IDB 초기화). Plan 실행은 별도 PR로 분리 예정 |
+| 2026-05-23 | `.claude/rules/git.md` 정식 갱신 — `[app]`·`[test]` 카테고리 정식 등록 (Phase 1 plan에 임시로 박았던 미해결 사항 해결). 분리 기준 표 + 묶어도 되는 경우 + 예시 블록 모두 추가. 짝 메모리 룰 추가: `commit-push-user-approval-required` (자동 commit·push 금지, 사용자 명시 요청 시에만 실행) |
+| 2026-05-23 | **Phase 2 + 2-B 핵심 기능 구현 완료** (B1~B8 8 묶음, plan 23 task 실행): lib 7개(types/db/crisis-resources/prompts 5종/safety/claude) + API Route(SSE) + 컴포넌트 5종(.tsx+.module.css 10 파일) + 페이지 3종(.tsx+.module.css 6 파일) + e2e/visual spec 2개(routes 3건 + components 4건) + fixtures 2종(sse-mock + init-script). typecheck/check/build 모두 PASS. visual spec 7건 detect. 사용자 액션: 다음 PR에서 `accept-baseline` 라벨로 7장 베이스라인 일괄 등록 |
+| 2026-05-24 | **사용자 시나리오 HTML 시각화** 추가 (`docs/design/scenarios.html`, 02_voca 패턴 미러링). 다크 배경 deck + light phone mockup 8 슬라이드: 첫방문(자기성찰)·한국전통톤·캐주얼톤·자해신호safety·히스토리회상·삭제·PWA설치·예외. ← → 키 / Home/End 단축키. dream-app.html 푸터에 링크 추가 |
+| 2026-05-25 | result page SSE fix: React 19 strict mode double-invoke 와 startedRef 충돌로 setState 갱신이 영원히 막히던 버그 해결 (AbortController 도입 + startedRef 제거 + try/catch 보강) |
+| 2026-05-26 | **LLM 공급자 전환**: Anthropic Claude Sonnet 4.6 → Google Gemini 2.5 Flash. 결제 부담 0 (무료 한도 일 1,500 req). 자산 24개·prompts/_compiled·system prompt 조립 로직 **모두 그대로 유지** — 변경된 건 LLM 호출 레이어 4개 파일(`lib/claude.ts`→`lib/llm.ts`, `lib/safety.ts`, `app/api/interpret/route.ts`, `.env.example`) + 패키지(`@anthropic-ai/sdk` → `@google/genai`). JSON 출력은 Gemini `responseSchema` 강제. 차별점(.claude 자산 system instruction 임베드)은 100% 유지 |
+| 2026-05-29 | **1차 동작 검증 완료** — dev 서버에서 3톤(casual/reflective/traditional) 모두 SSE 스트리밍 정상 (각 5/16/8 chunks, 1.3K~3.7K bytes). 자산 효과 확인: reflective 톤이 "한국 전통 + 융 + 프로이트 3관점 + 자기성찰 질문 3개" 의도 형식 그대로 응답. safety classifier 일반 꿈은 JSON 정상(`null`, conf 0.95), 위기 신호는 보수적 분기로 fallback (UX상 안전 카드 동일하게 표시). **추가 fix**: TIMEOUT 3s→10s, classifier maxOutputTokens 200→800, llm 1024→2048, 양쪽에 Gemini safetySettings BLOCK_ONLY_HIGH, JSON 자연어 prefix fallback parser. 디버깅 console.warn 제거. typecheck/check/build 모두 PASS |
