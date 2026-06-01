@@ -25,7 +25,7 @@
     "test:visual:report": "playwright show-report"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.97.1",
+    "@google/genai": "^2.6.0",
     "@gugbab/hooks": "^1.0.1",
     "@gugbab/styled-radix": "^1.0.1",
     "@gugbab/tokens": "^1.0.0",

@@ -354,14 +354,14 @@
       <h1>꿈해몽 PWA</h1>
       <p class="subtitle">사이드 프로젝트 · puk0806</p>
       <div class="meta">
-        <span class="badge status-green">🟢 Phase 1 + 1-B 부트스트랩 완료</span>
+        <span class="badge status-green">🟢 1차 동작 검증 완료 (Gemini 2.5 Flash · 3톤 SSE 정상)</span>
         <span class="badge accent">Next.js 16.2.6 · React 19 · TS 5</span>
         <span class="badge accent">UI: @gugbab/styled-radix</span>
         <span class="badge accent">자산 임베드: ON (24개)</span>
         <span class="badge accent">시각 회귀: ON</span>
         <span class="badge accent">Biome (Prettier 대체)</span>
         <span class="badge accent">머지 게이트: visual-regression 필수</span>
-        <span class="badge">최종 갱신 2026-05-21</span>
+        <span class="badge">최종 갱신 2026-05-22</span>
       </div>
     </header>
 
@@ -441,9 +441,9 @@
           <tr><td>React 버전</td><td class="tech">React 19</td><td class="note">styled-radix peer dep ≥ 18 충족</td></tr>
           <tr><td>검증</td><td class="tech">Zod</td><td class="note">API Route 입력</td></tr>
           <tr><td>로컬 저장</td><td class="tech">IndexedDB via idb</td><td class="note">DB gugbab-dream v1 / store entries</td></tr>
-          <tr><td>LLM (해몽)</td><td class="tech">Anthropic Claude Sonnet 4.6 (Messages API)</td><td class="note">@anthropic-ai/sdk + 프롬프트 캐싱 + SSE · Agent SDK 미사용 (Vercel 서버리스 비호환)</td></tr>
+          <tr><td>LLM (해몽)</td><td class="tech">Google Gemini 2.5 Flash</td><td class="note">@google/genai · generateContentStream + systemInstruction · 무료 한도 일 1,500 req · 결제 0</td></tr>
           <tr><td><strong style="color:var(--accent)">자산 통합</strong></td><td class="tech">.claude/agents + skills → 시스템 프롬프트 임베드</td><td class="note">scripts/compile-prompts.ts (prebuild) → lib/prompts/_compiled/*.ts</td></tr>
-          <tr><td>LLM (안전 분류)</td><td class="tech">Claude Haiku 4.5</td><td class="note">저비용·빠른 JSON 분류</td></tr>
+          <tr><td>LLM (안전 분류)</td><td class="tech">Google Gemini 2.5 Flash</td><td class="note">responseMimeType=application/json + responseSchema 로 JSON 강제 · 보수적 분기 (timeout/5xx/conf&lt;0.6)</td></tr>
           <tr><td>ID</td><td class="tech">ULID</td><td class="note">정렬 가능한 짧은 ID</td></tr>
           <tr><td>테스트</td><td class="tech">vitest + Testing Library</td><td class="note">단위·컴포넌트 테스트</td></tr>
           <tr><td><strong style="color:var(--accent)">시각 회귀</strong></td><td class="tech">Playwright + toHaveScreenshot</td><td class="note">02_voca 패턴 미러링 · CI Linux 단일 베이스라인 · accept-baseline 라벨 · __diff_archive__ 영구 보존</td></tr>
@@ -566,36 +566,37 @@
       <div class="phase">
         <div class="phase-head">
           <div class="phase-title">2단계 · 핵심 기능 구현</div>
-          <div class="phase-meta">0/13 · 예정</div>
+          <div class="phase-meta">13/13 완료 ✅</div>
         </div>
         <ul class="checklist">
-          <li>톤별 시스템 프롬프트 3종 (casual / reflective / traditional)</li>
-          <li>lib/claude.ts — SDK 래퍼 + 프롬프트 캐싱 + SSE</li>
-          <li>lib/safety.ts — 위기 신호 분류 (Haiku 4.5)</li>
-          <li>app/api/interpret/route.ts — 엔드포인트</li>
-          <li>lib/db.ts — IndexedDB CRUD (LRU 100건)</li>
-          <li>components/DreamInput.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Form)</span></li>
-          <li>components/ToneChips.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab ToggleGroup single)</span></li>
-          <li>components/InterpretationView.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Progress)</span></li>
-          <li>components/SafetyResourceCard.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Dialog + tel:)</span></li>
-          <li>components/HistoryList.tsx <span style="color:var(--text-faint);font-size:12px">(gugbab Separator)</span></li>
-          <li>app/page.tsx — 홈</li>
-          <li>app/result/[id]/page.tsx — 결과</li>
-          <li>app/history/page.tsx — 히스토리</li>
+          <li class="done">톤별 시스템 프롬프트 3종 (casual / reflective / traditional) + safety + index</li>
+          <li class="done">lib/claude.ts — SDK 래퍼 + 프롬프트 캐싱(ephemeral) + Messages.stream</li>
+          <li class="done">lib/safety.ts — Haiku 4.5 분류기 + 3s timeout + 보수적 분기</li>
+          <li class="done">app/api/interpret/route.ts — SSE 엔드포인트 (Zod + safety_block/chunk/done/error)</li>
+          <li class="done">lib/db.ts — IndexedDB(gugbab-dream v1) CRUD + LRU 100건 enforce</li>
+          <li class="done">lib/types.ts + crisis-resources.ts (공통 타입 + 한국 위기 자원 3종)</li>
+          <li class="done">components/DreamInput.tsx (textarea + 2000자 + 해석 버튼)</li>
+          <li class="done">components/ToneChips.tsx (gugbab ToggleGroup type=single)</li>
+          <li class="done">components/InterpretationView.tsx (SSE 누적 + 깜빡이 캐럿 + gugbab Progress)</li>
+          <li class="done">components/SafetyResourceCard.tsx (위기 자원 + tel: 링크)</li>
+          <li class="done">components/HistoryList.tsx (gugbab Separator + 단건 삭제)</li>
+          <li class="done">app/page.tsx — 홈 (DreamInput + 최근 3건)</li>
+          <li class="done">app/result/[id]/page.tsx — 결과 (SSE 클라이언트 + IDB 저장 + safety 분기)</li>
+          <li class="done">app/history/page.tsx — 히스토리 (100건 + 삭제)</li>
         </ul>
       </div>
 
       <!-- 2-B 단계: 시각 회귀 spec 확장 -->
       <div class="phase">
         <div class="phase-head">
-          <div class="phase-title">2-B단계 · <span style="color:var(--accent)">시각 회귀 spec 확장</span> (컴포넌트 추가와 병행)</div>
-          <div class="phase-meta">0/4 · 예정</div>
+          <div class="phase-title">2-B단계 · <span style="color:var(--accent)">시각 회귀 spec 확장</span></div>
+          <div class="phase-meta">3/4 완료 ✅ (베이스라인 등록은 사용자 액션)</div>
         </div>
         <ul class="checklist">
-          <li>routes.spec.ts — /, /result/[id], /history 3개 라우트 (LLM 응답은 page.route mocked SSE)</li>
-          <li>components.spec.ts — ToneChips 3톤 / SafetyResourceCard 자해 분기 / InterpretationView 스트리밍·완료</li>
-          <li>비결정 차단 fixture — addInitScript로 IndexedDB 초기화 + crypto.randomUUID 시드 고정</li>
-          <li>새 컴포넌트 머지 시마다 accept-baseline 라벨로 베이스라인 등록</li>
+          <li class="done">routes.spec.ts — 3건 (home, result-reflective, history-empty) + page.route mocked SSE + IDB seed</li>
+          <li class="done">components.spec.ts — 4건 (tone-chips × 3 + safety-card)</li>
+          <li class="done">_fixtures: sse-mock.ts (톤별 sample) + init-script.ts (IDB 초기화 + Math.random 시드 + Date freeze)</li>
+          <li>새 컴포넌트 머지 시마다 accept-baseline 라벨로 베이스라인 등록 <em style="color:var(--text-faint)">(다음 PR이 첫 일괄 등록 — 7장)</em></li>
         </ul>
       </div>
 
@@ -636,12 +637,11 @@
       <h2>지금 다음에 할 일</h2>
       <div class="next-list">
         <ol>
-          <li><strong>GitHub Repository → Labels → <code>accept-baseline</code> 라벨 생성</strong> (워크플로우 동작 조건)</li>
-          <li>현재 PR <code>feature/writing-plan-phase-1</code> 사용자가 GitHub에서 직접 PR 생성 (제목 예: "Phase 1 + 1-B 부트스트랩 — Next.js · PWA · Biome · 시각 회귀 인프라")</li>
-          <li>visual-regression CI 자동 실행 → 베이스라인 없으므로 fail + PR 코멘트에 신규 home actual PNG 표시 → <strong>머지 잠김 (Branch Protection)</strong></li>
-          <li>신규 PNG 검토 → <code>accept-baseline</code> 라벨 부여 → CI 자동 commit + PASS → 머지 가능</li>
-          <li>머지 후 Vercel에 레포 연결 + <code>ANTHROPIC_API_KEY</code> 환경변수 + Deploy (1회 점검)</li>
-          <li>새 feature 브랜치 <code>feature/phase-2-planning</code> → Phase 2 + 2-B (핵심 기능 구현 + 시각 회귀 spec 확장) 계획서 작성</li>
+          <li>현재 <code>feature/writing-plan-phase-2</code> 브랜치에 Phase 2 + 2-B 구현 코드 working tree 누적 완료 (commit·push는 사용자 명시 요청 시)</li>
+          <li>사용자가 commit 분리 OK 시: 카테고리별 5~6개 commit + push → GitHub PR 생성</li>
+          <li>PR CI 첫 실행 → 신규 베이스라인 7장 (home, result-reflective, history-empty, tone-chips × 3, safety-card) fail → 검토 → <code>accept-baseline</code> 라벨 부여 → CI 자동 commit + PASS → 머지 가능</li>
+          <li>머지 후 Vercel 자동 배포 (Phase 1 머지 후 사용자가 Vercel 연결한 경우) — 첫 prod URL 확인 + 실제 LLM 응답 (Anthropic API 키 입력 상태) 점검</li>
+          <li>Phase 3 (안정화) 계획서 작성 단계 진입 — ErrorBoundary · 오프라인 UI · 안전 시뮬레이션 5케이스 · Lighthouse 90+ · 모바일 360px 점검 · 베이스라인 전체 갱신</li>
         </ol>
       </div>
     </section>
@@ -650,7 +650,8 @@
       <p>
         이 페이지는 작업 진행에 따라 자동 갱신됩니다.<br>
         원본 마크다운: <code>docs/superpowers/specs/2026-05-16-dream-app-design.md</code><br>
-        진행판: <code>docs/superpowers/specs/2026-05-16-dream-app-todo.md</code>
+        진행판: <code>docs/superpowers/specs/2026-05-16-dream-app-todo.md</code><br>
+        🎬 사용자 시나리오 시각화: <code>docs/design/scenarios.html</code> (브라우저로 더블클릭, ← → 키로 이동)
       </p>
     </footer>
 

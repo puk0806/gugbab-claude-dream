@@ -1,0 +1,36 @@
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--gugbab-space-6, 24px);
+  min-height: 90vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--gugbab-space-3, 12px);
+  margin-bottom: var(--gugbab-space-5, 20px);
+}
+
+.back {
+  color: var(--gugbab-color-accent-base, #0090ff);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.clearBtn {
+  padding: var(--gugbab-space-2, 8px) var(--gugbab-space-3, 12px);
+  background: transparent;
+  border: 1px solid var(--gugbab-color-danger-base, #e5484d);
+  color: var(--gugbab-color-danger-base, #e5484d);
+  border-radius: var(--gugbab-radius-sm, 3px);
+  cursor: pointer;
+  font-size: 12px;
+}
