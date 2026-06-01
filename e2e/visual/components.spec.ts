@@ -24,7 +24,8 @@ test.describe('components — visual regression', () => {
     test(`tone-chips-${tone}`, async ({ page }) => {
       await page.goto('/');
       await page.waitForLoadState('networkidle');
-      await page.getByRole('button', { name: TONE_BUTTON_LABEL[tone] }).click();
+      // styled-radix ToggleGroup.Item 은 role=radio (type=single 이라). 텍스트로 찾는다.
+      await page.getByText(TONE_BUTTON_LABEL[tone], { exact: true }).click();
       await expect(page.locator('form')).toHaveScreenshot(`tone-chips-${tone}.png`);
     });
   }
