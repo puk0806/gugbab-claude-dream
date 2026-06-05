@@ -31,29 +31,35 @@
   color: var(--gugbab-color-fg-muted, #80838d);
 }
 
-.tone {
+.msgCount {
   font-size: 12px;
-  padding: 2px var(--gugbab-space-2, 8px);
-  background: var(--gugbab-color-accent-subtle, #e6f4fe);
-  color: var(--gugbab-color-accent-base, #0090ff);
-  border-radius: 999px;
+  color: var(--gugbab-color-fg-muted, #80838d);
 }
 
 .preview {
-  margin: 0;
   font-size: 14px;
-  color: var(--gugbab-color-fg-primary, #1c2024);
-  line-height: 1.5;
+  color: var(--gugbab-color-fg-secondary, #60646c);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .deleteBtn {
   padding: var(--gugbab-space-1, 4px) var(--gugbab-space-2, 8px);
   font-size: 12px;
-  background: transparent;
-  border: 1px solid var(--gugbab-color-border-subtle, #d9d9e0);
-  border-radius: var(--gugbab-radius-sm, 3px);
-  color: var(--gugbab-color-fg-secondary, #60646c);
+  background: none;
+  border: 1px solid var(--gugbab-color-border-base, #cdced6);
+  border-radius: var(--gugbab-radius-md, 4px);
   cursor: pointer;
+  color: var(--gugbab-color-fg-secondary, #60646c);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.deleteBtn:hover {
+  border-color: #ef4444;
+  color: #c33;
 }
 
 .separator {

@@ -1,0 +1,17 @@
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gugbab-space-3, 12px);
+  overflow-y: auto;
+  padding: var(--gugbab-space-4, 16px) var(--gugbab-space-3, 12px);
+  width: 100%;
+}
+
+.empty {
+  text-align: center;
+  color: var(--gugbab-color-fg-muted, #80838d);
+  font-size: 15px;
+  margin: auto;
+  padding: var(--gugbab-space-8, 32px) 0;
+}
