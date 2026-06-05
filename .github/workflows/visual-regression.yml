@@ -128,6 +128,8 @@ jobs:
       - name: Generate accepted baseline
         if: steps.mode.outputs.mode == 'accept'
         run: pnpm test:visual:update
+        env:
+          GEMINI_API_KEY: dummy-for-visual-regression
 
       - name: Commit accepted baseline to PR branch
         id: accept_commit
@@ -149,7 +151,7 @@ jobs:
             done < /tmp/filled-baseline.txt
             rm -f /tmp/orig-baseline.png
           fi
-          git add e2e/visual/__screenshots__
+          git add -f e2e/visual/__screenshots__
           if git diff --cached --quiet; then
             echo "pushed=false" >> $GITHUB_OUTPUT
             echo "target_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -212,12 +214,16 @@ jobs:
         if: steps.mode.outputs.mode == 'compare' && steps.baseline.outputs.exists == 'true'
         run: pnpm test:visual
         continue-on-error: true
+        env:
+          GEMINI_API_KEY: dummy-for-visual-regression
 
       - name: Run visual regression (baseline 미존재 — 신규 캡처용)
         id: vr_new
         if: steps.mode.outputs.mode == 'compare' && steps.baseline.outputs.exists == 'false'
         run: pnpm test:visual:update
         continue-on-error: true
+        env:
+          GEMINI_API_KEY: dummy-for-visual-regression
 
       - name: Collect failing/new screenshots
         id: collect

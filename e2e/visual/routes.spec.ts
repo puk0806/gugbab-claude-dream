@@ -1,12 +1,10 @@
 /**
- * 라우트 시각 회귀 spec — Phase 2-B 확장.
+ * 라우트 시각 회귀 spec — Phase 3 채팅 UI.
  *
- * 라우트: /, /result/[id], /history
- * 비결정 차단: addInitScript (IndexedDB·random·Date) + page.route SSE mock
+ * 라우트: /, /session/[id], /history
  */
 import { expect, type Page, test } from '@playwright/test';
-import { FIXTURE_SCRIPT, makeSeedIdbScript } from './_fixtures/init-script';
-import { mockInterpretRoute } from './_fixtures/sse-mock';
+import { FIXTURE_SCRIPT, makeSeedSessionScript } from './_fixtures/init-script';
 
 async function settle(page: Page): Promise<void> {
   await page.waitForLoadState('networkidle');
@@ -23,20 +21,38 @@ test.describe('routes — visual regression', () => {
     await expect(page).toHaveScreenshot('home.png', { fullPage: true });
   });
 
-  test('result-reflective', async ({ page }) => {
-    await page.route('**/api/interpret', (route) => mockInterpretRoute(route, 'reflective'));
+  test('home-with-recent', async ({ page }) => {
     const seedId = 'fixt01ULIDXXXXXXXXXXXXXXXX';
     await page.addInitScript(
-      makeSeedIdbScript({
+      makeSeedSessionScript({
         id: seedId,
-        tone: 'reflective',
-        dreamText: '맑은 강에서 큰 물고기를 잡았어요.',
+        summary: '뱀이 나오는 꿈을 꿨어요',
+        messages: [
+          { role: 'user', content: '뱀이 나오는 꿈을 꿨어요', timestamp: Date.UTC(2026, 4, 21, 0, 0, 1) },
+          { role: 'model', content: '오 뱀 꿈이군요! 뱀이 어떤 상태였나요?', timestamp: Date.UTC(2026, 4, 21, 0, 0, 2) },
+        ],
       }),
     );
-    await page.goto(`/result/${seedId}`);
+    await page.goto('/');
     await settle(page);
-    await page.waitForSelector('text=나에게 묻는 질문', { timeout: 5000 });
-    await expect(page).toHaveScreenshot('result-reflective.png', { fullPage: true });
+    await expect(page).toHaveScreenshot('home-with-recent.png', { fullPage: true });
+  });
+
+  test('session-readonly', async ({ page }) => {
+    const seedId = 'fixt01ULIDXXXXXXXXXXXXXXXX';
+    await page.addInitScript(
+      makeSeedSessionScript({
+        id: seedId,
+        summary: '뱀이 나오는 꿈을 꿨어요',
+        messages: [
+          { role: 'user', content: '뱀이 나오는 꿈을 꿨어요', timestamp: Date.UTC(2026, 4, 21, 0, 0, 1) },
+          { role: 'model', content: '오 뱀 꿈이군요! 뱀이 어떤 상태였나요?', timestamp: Date.UTC(2026, 4, 21, 0, 0, 2) },
+        ],
+      }),
+    );
+    await page.goto(`/session/${seedId}`);
+    await settle(page);
+    await expect(page).toHaveScreenshot('session-readonly.png', { fullPage: true });
   });
 
   test('history-empty', async ({ page }) => {
@@ -45,3 +61,4 @@ test.describe('routes — visual regression', () => {
     await expect(page).toHaveScreenshot('history-empty.png', { fullPage: true });
   });
 });
+

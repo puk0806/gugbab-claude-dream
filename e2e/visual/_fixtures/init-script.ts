@@ -30,36 +30,36 @@ export const FIXTURE_SCRIPT = `
   })();
 `;
 
-/**
- * 결정론 fixture entry 1건을 IndexedDB(gugbab-dream)에 미리 박는 스크립트.
- * tone 별로 entry id 만 다르고 텍스트는 동일.
- */
-export function makeSeedIdbScript(opts: {
+export function makeSeedSessionScript(opts: {
   id: string;
-  tone: 'casual' | 'reflective' | 'traditional';
-  dreamText: string;
+  summary: string;
+  messages: Array<{ role: 'user' | 'model'; content: string; timestamp: number }>;
 }): string {
   return `
     indexedDB.deleteDatabase('gugbab-dream');
-    const req = indexedDB.open('gugbab-dream', 1);
+    const req = indexedDB.open('gugbab-dream', 2);
     req.onupgradeneeded = () => {
       const db = req.result;
-      const store = db.createObjectStore('entries', { keyPath: 'id' });
-      store.createIndex('createdAt_idx', 'createdAt');
+      if (!db.objectStoreNames.contains('entries')) {
+        const es = db.createObjectStore('entries', { keyPath: 'id' });
+        es.createIndex('createdAt_idx', 'createdAt');
+      }
+      if (!db.objectStoreNames.contains('sessions')) {
+        const ss = db.createObjectStore('sessions', { keyPath: 'id' });
+        ss.createIndex('createdAt_idx', 'createdAt');
+      }
     };
     req.onsuccess = () => {
       const db = req.result;
-      const tx = db.transaction('entries', 'readwrite');
-      tx.objectStore('entries').put({
-        id: ${JSON.stringify(opts.id)},
+      const tx = db.transaction('sessions', 'readwrite');
+      tx.objectStore('sessions').put(${JSON.stringify({
+        id: opts.id,
         createdAt: Date.UTC(2026, 4, 21, 0, 0, 0),
-        dreamText: ${JSON.stringify(opts.dreamText)},
-        tone: ${JSON.stringify(opts.tone)},
-        interpretation: '',
-        safetyVerdict: { category: 'null', confidence: 0 },
-        modelId: '',
-        schemaVersion: 1,
-      });
+        messages: opts.messages,
+        summary: opts.summary,
+        modelId: 'gemini-2.5-flash',
+        schemaVersion: 2,
+      })});
     };
   `;
 }

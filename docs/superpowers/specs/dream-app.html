@@ -355,13 +355,14 @@
       <p class="subtitle">사이드 프로젝트 · puk0806</p>
       <div class="meta">
         <span class="badge status-green">🟢 1차 동작 검증 완료 (Gemini 2.5 Flash · 3톤 SSE 정상)</span>
+        <span class="badge status-yellow">🟡 Phase 3 채팅·음성 재설계 스펙 작성 완료 — 구현 계획 대기</span>
         <span class="badge accent">Next.js 16.2.6 · React 19 · TS 5</span>
         <span class="badge accent">UI: @gugbab/styled-radix</span>
         <span class="badge accent">자산 임베드: ON (24개)</span>
         <span class="badge accent">시각 회귀: ON</span>
         <span class="badge accent">Biome (Prettier 대체)</span>
         <span class="badge accent">머지 게이트: visual-regression 필수</span>
-        <span class="badge">최종 갱신 2026-05-22</span>
+        <span class="badge">최종 갱신 2026-06-05</span>
       </div>
     </header>
 
@@ -369,9 +370,10 @@
     <section>
       <h2>한 줄 정의</h2>
       <div class="pitch">
-        사용자가 어젯밤 꿈을 적고 <strong>톤(캐주얼 · 자기 성찰 · 한국 전통) 중 하나를 골라 누르면</strong>,
-        Claude가 그 톤에 맞게 해몽해주는 <strong>PWA</strong>. 회원가입 없음, 서버 DB 없음,
-        브라우저 로컬에 최근 100건만 저장.
+        꿈을 <strong>텍스트 또는 음성(마이크)</strong>으로 말하면, 스킬·에이전트 지식을 품은 Gemini가
+        <strong>대화형으로 해몽</strong>해주는 PWA. 후속 질문으로 해석이 깊어지고, 응답은 TTS로 읽어준다.
+        회원가입 없음, 서버 DB 없음, 브라우저 로컬에 세션 100건 저장.
+        <br><small style="color:var(--text-faint);font-size:13px;">※ Phase 3 재설계: 채팅 UI + 음성 I/O + 안전 분류기 제거 + 캐주얼 고정 + 스킬 품질 전면 통합</small>
       </div>
     </section>
 
@@ -381,43 +383,43 @@
       <div class="cards">
         <div class="card">
           <div class="label">형태</div>
-          <div class="value">단발 해몽 도구</div>
-          <div class="note">입력 → 결과 1회. 빠른 MVP.</div>
+          <div class="value">대화형 해몽 (채팅 세션)</div>
+          <div class="note">꿈 1개 = 멀티턴 채팅. 후속 질문으로 깊어짐.</div>
         </div>
         <div class="card">
-          <div class="label">톤 (사용자 선택)</div>
-          <div class="value">캐주얼 / 자기 성찰 / 한국 전통</div>
-          <div class="note">기본값: 자기 성찰</div>
+          <div class="label">톤</div>
+          <div class="value">캐주얼 고정</div>
+          <div class="note">ToneChips 제거. 단일 프롬프트에 모든 스킬 통합.</div>
         </div>
         <div class="card">
-          <div class="label">응답 구조</div>
-          <div class="value">단일 톤 모드 (A안)</div>
-          <div class="note">결과 화면에 "다른 톤으로 보기" 버튼</div>
+          <div class="label">음성 입력</div>
+          <div class="value">Web Speech API (SpeechRecognition)</div>
+          <div class="note">브라우저 내장 · 비용 0 · ko-KR · Chrome/Edge/Safari</div>
+        </div>
+        <div class="card">
+          <div class="label">음성 출력</div>
+          <div class="value">Web Speech API (SpeechSynthesis)</div>
+          <div class="note">AI 응답 완료 후 TTS 자동 읽기 (토글 OFF 기본)</div>
         </div>
         <div class="card">
           <div class="label">저장</div>
-          <div class="value">IndexedDB 100건 LRU</div>
-          <div class="note">서버 DB 없음, 회원가입 없음</div>
+          <div class="value">IndexedDB DreamSession 100건 LRU</div>
+          <div class="note">DB v2 · store: sessions · 서버 DB 없음</div>
         </div>
         <div class="card">
           <div class="label">비용 모델</div>
           <div class="value">무료 무제한</div>
-          <div class="note">사이드 프로젝트. 공개 시 한도 추가 권고</div>
+          <div class="note">Gemini 2.5 Flash 일 1,500 req 무료</div>
         </div>
         <div class="card">
           <div class="label">안전 정책</div>
-          <div class="value">위기 신호 시 해몽 차단</div>
-          <div class="note">109 · 1577-0199 · 1388 안내 카드</div>
-        </div>
-        <div class="card">
-          <div class="label">UI 시스템</div>
-          <div class="value">@gugbab/styled-radix</div>
-          <div class="note">Radix Themes 외관 35종 · npm 게시</div>
+          <div class="value">완전 제거</div>
+          <div class="note">개인 용도. 과민 차단 불필요. safety.ts 삭제.</div>
         </div>
         <div class="card" style="border-color: var(--accent-strong); background: linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(236,72,153,0.04) 100%);">
           <div class="label" style="color: var(--accent);">⭐ 핵심 차별점</div>
-          <div class="value">.claude 자산을 시스템 프롬프트로 임베드</div>
-          <div class="note">한국 전통 해몽 · 융/프로이트 · 한국형 위기 자원 통째 흡수</div>
+          <div class="value">모든 스킬 통합 · 대화형 품질</div>
+          <div class="note">한국 전통 + 융/프로이트 + 현대 연구 → 단일 캐주얼 프롬프트. 멀티턴으로 점점 정확해짐.</div>
         </div>
       </div>
     </section>
@@ -443,47 +445,48 @@
           <tr><td>로컬 저장</td><td class="tech">IndexedDB via idb</td><td class="note">DB gugbab-dream v1 / store entries</td></tr>
           <tr><td>LLM (해몽)</td><td class="tech">Google Gemini 2.5 Flash</td><td class="note">@google/genai · generateContentStream + systemInstruction · 무료 한도 일 1,500 req · 결제 0</td></tr>
           <tr><td><strong style="color:var(--accent)">자산 통합</strong></td><td class="tech">.claude/agents + skills → 시스템 프롬프트 임베드</td><td class="note">scripts/compile-prompts.ts (prebuild) → lib/prompts/_compiled/*.ts</td></tr>
-          <tr><td>LLM (안전 분류)</td><td class="tech">Google Gemini 2.5 Flash</td><td class="note">responseMimeType=application/json + responseSchema 로 JSON 강제 · 보수적 분기 (timeout/5xx/conf&lt;0.6)</td></tr>
+          <tr><td>음성 입력</td><td class="tech">Web Speech API (SpeechRecognition)</td><td class="note">브라우저 내장 · 비용 0 · ko-KR · lib/speech.ts 래퍼</td></tr>
+          <tr><td>음성 출력</td><td class="tech">Web Speech API (SpeechSynthesis)</td><td class="note">브라우저 내장 · 비용 0 · AI 응답 완료 후 전체 읽기</td></tr>
+          <tr><td>LLM (안전 분류)</td><td class="tech" style="color:var(--red)">제거됨</td><td class="note">lib/safety.ts · crisis-resources.ts 삭제 · 개인 용도</td></tr>
           <tr><td>ID</td><td class="tech">ULID</td><td class="note">정렬 가능한 짧은 ID</td></tr>
           <tr><td>테스트</td><td class="tech">vitest + Testing Library</td><td class="note">단위·컴포넌트 테스트</td></tr>
           <tr><td><strong style="color:var(--accent)">시각 회귀</strong></td><td class="tech">Playwright + toHaveScreenshot</td><td class="note">02_voca 패턴 미러링 · CI Linux 단일 베이스라인 · accept-baseline 라벨 · __diff_archive__ 영구 보존</td></tr>
           <tr><td>기능 E2E</td><td class="tech">—</td><td class="note">v1.1 이후 (시각 회귀로 MVP 충분)</td></tr>
           <tr><td>린트/포맷</td><td class="tech">Biome + @gugbab/biome-config</td><td class="note">ESLint·Prettier 대체. check / check:fix / lint / format 통합</td></tr>
-          <tr><td>환경 변수</td><td class="tech">ANTHROPIC_API_KEY</td><td class="note">서버 전용 · 클라이언트 노출 금지</td></tr>
+          <tr><td>환경 변수</td><td class="tech">GEMINI_API_KEY</td><td class="note">서버 전용 · 클라이언트 노출 금지</td></tr>
         </tbody>
       </table>
     </section>
 
     <!-- 화면 -->
     <section>
-      <h2>화면 흐름</h2>
+      <h2>화면 흐름 <small style="font-size:13px;color:var(--text-faint);font-weight:400">(Phase 3 재설계)</small></h2>
       <div class="screens">
         <div class="screen">
           <span class="route">/</span>
-          <div class="title">홈 — 입력</div>
+          <div class="title">채팅 홈</div>
           <ul>
-            <li>꿈 textarea</li>
-            <li>톤 칩 3개 (기본: 자기 성찰)</li>
-            <li>해석하기 버튼</li>
-            <li>최근 해몽 3건 카드</li>
+            <li>메시지 리스트 (대화 흐름)</li>
+            <li>입력 바: 텍스트 + 🎤 마이크 + 🔊 TTS 토글 + 전송</li>
+            <li>"새 꿈 이야기하기" 버튼 (세션 있을 때)</li>
+            <li>세션 없으면 환영 메시지</li>
           </ul>
         </div>
         <div class="screen">
-          <span class="route">/result/[id]</span>
-          <div class="title">결과 — 스트리밍</div>
+          <span class="route">/session/[id]</span>
+          <div class="title">과거 세션 (읽기 전용)</div>
           <ul>
-            <li>꿈 요약 + 톤 배지</li>
-            <li>본문 스트리밍 렌더</li>
-            <li>다른 톤으로 보기 · 복사 · 삭제</li>
-            <li>위기 신호 시 SafetyResourceCard</li>
+            <li>저장된 대화 복원 표시</li>
+            <li>입력 바 없음</li>
+            <li>"새 꿈 이야기하기" 버튼</li>
           </ul>
         </div>
         <div class="screen">
           <span class="route">/history</span>
           <div class="title">히스토리</div>
           <ul>
-            <li>최근 100건 리스트</li>
-            <li>날짜 · 톤 · 첫 문장</li>
+            <li>DreamSession 리스트 (최신순)</li>
+            <li>첫 메시지 50자 요약 + 날짜 + 대화 수</li>
             <li>단건 / 전체 삭제</li>
           </ul>
         </div>
@@ -603,17 +606,17 @@
       <!-- 3단계 -->
       <div class="phase">
         <div class="phase-head">
-          <div class="phase-title">3단계 · 안정화</div>
-          <div class="phase-meta">0/7 · 예정</div>
+          <div class="phase-title">3단계 · 채팅·음성 재설계 <span style="color:var(--yellow)">★ Phase 3</span></div>
+          <div class="phase-meta">0/7 · 스펙 완료 — 구현 계획 대기</div>
         </div>
         <ul class="checklist">
-          <li>ErrorBoundary + API 실패 UI</li>
-          <li>오프라인 안내 UI</li>
-          <li>안전 분류기 시뮬레이션 테스트</li>
-          <li>톤별 응답 품질 점검</li>
-          <li>모바일 360px / 데스크탑 1280px 렌더 점검 (수동)</li>
-          <li>Lighthouse PWA 점수 90+</li>
-          <li>시각 회귀 베이스라인 전체 한 번 갱신 (디자인 무드 확정 후)</li>
+          <li class="current">3-A: 불필요 코드 제거 (safety / ToneChips / InterpretationView / /result)</li>
+          <li>3-B: 통합 시스템 프롬프트 (lib/prompts/chat.ts) + /api/chat 엔드포인트</li>
+          <li>3-C: ChatView + ChatInput + MessageBubble + TypingIndicator 컴포넌트</li>
+          <li>3-D: 홈 페이지 채팅 UI 전환 + IDB DreamSession CRUD (DB v2)</li>
+          <li>3-E: lib/speech.ts (Web Speech API) + 마이크/TTS ChatInput 통합</li>
+          <li>3-F: /session/[id] 읽기 전용 페이지 + /history 타입 교체</li>
+          <li>3-G: 시각 회귀 spec 업데이트 + 동작 검증</li>
         </ul>
       </div>
 
@@ -637,11 +640,11 @@
       <h2>지금 다음에 할 일</h2>
       <div class="next-list">
         <ol>
-          <li>현재 <code>feature/writing-plan-phase-2</code> 브랜치에 Phase 2 + 2-B 구현 코드 working tree 누적 완료 (commit·push는 사용자 명시 요청 시)</li>
-          <li>사용자가 commit 분리 OK 시: 카테고리별 5~6개 commit + push → GitHub PR 생성</li>
-          <li>PR CI 첫 실행 → 신규 베이스라인 7장 (home, result-reflective, history-empty, tone-chips × 3, safety-card) fail → 검토 → <code>accept-baseline</code> 라벨 부여 → CI 자동 commit + PASS → 머지 가능</li>
-          <li>머지 후 Vercel 자동 배포 (Phase 1 머지 후 사용자가 Vercel 연결한 경우) — 첫 prod URL 확인 + 실제 LLM 응답 (Anthropic API 키 입력 상태) 점검</li>
-          <li>Phase 3 (안정화) 계획서 작성 단계 진입 — ErrorBoundary · 오프라인 UI · 안전 시뮬레이션 5케이스 · Lighthouse 90+ · 모바일 360px 점검 · 베이스라인 전체 갱신</li>
+          <li><strong>writing-plans 스킬로 Phase 3 구현 계획서 작성</strong> — 3-A~3-G 7단계를 task 단위로 분해</li>
+          <li>Phase 3-A 시작: 불필요 코드 제거 (lib/safety.ts · crisis-resources.ts · ToneChips · InterpretationView · SafetyResourceCard · /result/[id] 라우트)</li>
+          <li>Phase 3-B: 통합 시스템 프롬프트 (모든 스킬 임베드) + /api/chat 멀티턴 SSE 엔드포인트</li>
+          <li>Phase 3-C~F: 채팅 UI 컴포넌트 4종 + 홈 전환 + IDB v2 + 음성 I/O + /session/[id]</li>
+          <li>Phase 3-G: 시각 회귀 spec 업데이트 → accept-baseline 라벨 → PR 머지 → Vercel 배포</li>
         </ol>
       </div>
     </section>
@@ -649,7 +652,8 @@
     <footer>
       <p>
         이 페이지는 작업 진행에 따라 자동 갱신됩니다.<br>
-        원본 마크다운: <code>docs/superpowers/specs/2026-05-16-dream-app-design.md</code><br>
+        원본 마크다운: <code>docs/superpowers/specs/2026-05-16-dream-app-design.md</code> (Phase 1~2)<br>
+        Phase 3 재설계: <code>docs/superpowers/specs/2026-06-05-dream-chat-redesign.md</code><br>
         진행판: <code>docs/superpowers/specs/2026-05-16-dream-app-todo.md</code><br>
         🎬 사용자 시나리오 시각화: <code>docs/design/scenarios.html</code> (브라우저로 더블클릭, ← → 키로 이동)
       </p>

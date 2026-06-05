@@ -2,19 +2,13 @@
 
 import { Separator } from '@gugbab/styled-radix';
 import Link from 'next/link';
-import type { DreamEntry, Tone } from '@/lib/types';
+import type { DreamSession } from '@/lib/types';
 import styles from './HistoryList.module.css';
 
 interface HistoryListProps {
-  entries: DreamEntry[];
+  sessions: DreamSession[];
   onDelete?: (id: string) => void;
 }
-
-const TONE_BADGE: Record<Tone, string> = {
-  casual: '캐주얼',
-  reflective: '자기 성찰',
-  traditional: '한국 전통',
-};
 
 function formatDate(ms: number): string {
   const d = new Date(ms);
@@ -24,38 +18,33 @@ function formatDate(ms: number): string {
   return `${y}-${mo}-${da}`;
 }
 
-function firstLine(s: string, n = 60): string {
-  const trimmed = s.trim().replace(/\s+/g, ' ');
-  return trimmed.length > n ? `${trimmed.slice(0, n)}…` : trimmed;
-}
-
-export function HistoryList({ entries, onDelete }: HistoryListProps) {
-  if (entries.length === 0) {
-    return <p className={styles.empty}>아직 저장된 해몽이 없어요.</p>;
+export function HistoryList({ sessions, onDelete }: HistoryListProps) {
+  if (sessions.length === 0) {
+    return <p className={styles.empty}>아직 저장된 대화가 없어요.</p>;
   }
 
   return (
     <ul className={styles.list}>
-      {entries.map((e, idx) => (
-        <li key={e.id} className={styles.item}>
-          <Link href={`/result/${e.id}`} className={styles.link}>
+      {sessions.map((s, idx) => (
+        <li key={s.id} className={styles.item}>
+          <Link href={`/session/${s.id}`} className={styles.link}>
             <div className={styles.meta}>
-              <span className={styles.date}>{formatDate(e.createdAt)}</span>
-              <span className={styles.tone}>{TONE_BADGE[e.tone]}</span>
+              <span className={styles.date}>{formatDate(s.createdAt)}</span>
+              <span className={styles.msgCount}>{s.messages.length}개 메시지</span>
             </div>
-            <p className={styles.preview}>{firstLine(e.dreamText)}</p>
+            <p className={styles.preview}>{s.summary}</p>
           </Link>
           {onDelete && (
             <button
               type="button"
               className={styles.deleteBtn}
-              onClick={() => onDelete(e.id)}
-              aria-label={`${formatDate(e.createdAt)} 해몽 삭제`}
+              onClick={() => onDelete(s.id)}
+              aria-label={`${formatDate(s.createdAt)} 대화 삭제`}
             >
               삭제
             </button>
           )}
-          {idx < entries.length - 1 && <Separator className={styles.separator} />}
+          {idx < sessions.length - 1 && <Separator className={styles.separator} />}
         </li>
       ))}
     </ul>

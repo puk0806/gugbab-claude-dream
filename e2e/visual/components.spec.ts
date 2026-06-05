@@ -1,50 +1,35 @@
 /**
- * 컴포넌트 상태별 시각 회귀.
- *
- * 페이지 경유로 캡처 (Storybook 미사용):
- *   - tone-chips: 홈에서 톤 클릭 후 form 영역만
- *   - safety-card: result 페이지에서 mocked safety_block 응답 후 카드 영역만
+ * 컴포넌트 상태별 시각 회귀 — Phase 3 채팅 UI.
  */
 import { expect, test } from '@playwright/test';
-import { FIXTURE_SCRIPT, makeSeedIdbScript } from './_fixtures/init-script';
-import { mockInterpretRoute } from './_fixtures/sse-mock';
-
-const TONE_BUTTON_LABEL: Record<'casual' | 'reflective' | 'traditional', string> = {
-  casual: '캐주얼',
-  reflective: '자기 성찰',
-  traditional: '한국 전통',
-};
+import { FIXTURE_SCRIPT, makeSeedSessionScript } from './_fixtures/init-script';
 
 test.describe('components — visual regression', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(FIXTURE_SCRIPT);
   });
 
-  for (const tone of ['casual', 'reflective', 'traditional'] as const) {
-    test(`tone-chips-${tone}`, async ({ page }) => {
-      await page.goto('/');
-      await page.waitForLoadState('networkidle');
-      // styled-radix ToggleGroup.Item 은 role=radio (type=single 이라). 텍스트로 찾는다.
-      await page.getByText(TONE_BUTTON_LABEL[tone], { exact: true }).click();
-      await expect(page.locator('form')).toHaveScreenshot(`tone-chips-${tone}.png`);
-    });
-  }
+  test('chat-input-idle', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const inputBar = page.locator('[aria-label="꿈 입력"]');
+    await expect(inputBar).toBeVisible();
+    await expect(inputBar.locator('..').locator('..')).toHaveScreenshot('chat-input-idle.png');
+  });
 
-  test('safety-card', async ({ page }) => {
-    await page.route('**/api/interpret', (route) => mockInterpretRoute(route, 'safety'));
-    const seedId = 'safety01ULIDXXXXXXXXXXXXXX';
+  test('history-list-with-sessions', async ({ page }) => {
     await page.addInitScript(
-      makeSeedIdbScript({
-        id: seedId,
-        tone: 'reflective',
-        dreamText: '(자해 시뮬레이션 입력)',
+      makeSeedSessionScript({
+        id: 'fixt01ULIDXXXXXXXXXXXXXXXX',
+        summary: '뱀이 나오는 꿈을 꿨어요',
+        messages: [
+          { role: 'user', content: '뱀이 나오는 꿈을 꿨어요', timestamp: Date.UTC(2026, 4, 21, 0, 0, 1) },
+          { role: 'model', content: '오 뱀 꿈이군요!', timestamp: Date.UTC(2026, 4, 21, 0, 0, 2) },
+        ],
       }),
     );
-    await page.goto(`/result/${seedId}`);
+    await page.goto('/history');
     await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=자살예방상담전화', { timeout: 5000 });
-    await expect(page.locator('section[aria-labelledby="safety-title"]')).toHaveScreenshot(
-      'safety-card.png',
-    );
+    await expect(page).toHaveScreenshot('history-with-sessions.png', { fullPage: true });
   });
 });
