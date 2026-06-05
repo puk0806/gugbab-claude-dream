@@ -5,8 +5,6 @@ const MODEL_ID = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash';
 const MAX_TOKENS = 2048;
 const TEMPERATURE = 0.7;
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 const SAFETY_SETTINGS = [
   {
     category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -29,6 +27,7 @@ const SAFETY_SETTINGS = [
 export function getChatStream(
   messages: Array<{ role: 'user' | 'model'; content: string }>,
 ) {
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   return ai.models.generateContentStream({
     model: MODEL_ID,
     config: {
