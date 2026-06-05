@@ -149,7 +149,7 @@ jobs:
             done < /tmp/filled-baseline.txt
             rm -f /tmp/orig-baseline.png
           fi
-          git add e2e/visual/__screenshots__
+          git add -f e2e/visual/__screenshots__
           if git diff --cached --quiet; then
             echo "pushed=false" >> $GITHUB_OUTPUT
             echo "target_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
