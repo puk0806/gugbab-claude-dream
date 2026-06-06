@@ -354,15 +354,16 @@
       <h1>꿈해몽 PWA</h1>
       <p class="subtitle">사이드 프로젝트 · puk0806</p>
       <div class="meta">
-        <span class="badge status-green">🟢 1차 동작 검증 완료 (Gemini 2.5 Flash · 3톤 SSE 정상)</span>
-        <span class="badge status-yellow">🟡 Phase 3 채팅·음성 재설계 스펙 작성 완료 — 구현 계획 대기</span>
+        <span class="badge status-green">🟢 Phase 3 완료 ✅ · main 머지 완료</span>
+        <span class="badge status-green">🟢 PWA 설치 버튼 · 드림 아이콘 · 코드 리팩토링 완료</span>
+        <span class="badge status-yellow">🟡 4단계 · Vercel 프로덕션 배포 예정</span>
         <span class="badge accent">Next.js 16.2.6 · React 19 · TS 5</span>
         <span class="badge accent">UI: @gugbab/styled-radix</span>
         <span class="badge accent">자산 임베드: ON (24개)</span>
         <span class="badge accent">시각 회귀: ON</span>
         <span class="badge accent">Biome (Prettier 대체)</span>
         <span class="badge accent">머지 게이트: visual-regression 필수</span>
-        <span class="badge">최종 갱신 2026-06-05</span>
+        <span class="badge">최종 갱신 2026-06-06</span>
       </div>
     </header>
 
@@ -606,17 +607,31 @@
       <!-- 3단계 -->
       <div class="phase">
         <div class="phase-head">
-          <div class="phase-title">3단계 · 채팅·음성 재설계 <span style="color:var(--yellow)">★ Phase 3</span></div>
-          <div class="phase-meta">0/7 · 스펙 완료 — 구현 계획 대기</div>
+          <div class="phase-title">3단계 · 채팅·음성 재설계 <span style="color:var(--green)">✅ Phase 3</span></div>
+          <div class="phase-meta">7/7 완료 ✅</div>
         </div>
         <ul class="checklist">
-          <li class="current">3-A: 불필요 코드 제거 (safety / ToneChips / InterpretationView / /result)</li>
-          <li>3-B: 통합 시스템 프롬프트 (lib/prompts/chat.ts) + /api/chat 엔드포인트</li>
-          <li>3-C: ChatView + ChatInput + MessageBubble + TypingIndicator 컴포넌트</li>
-          <li>3-D: 홈 페이지 채팅 UI 전환 + IDB DreamSession CRUD (DB v2)</li>
-          <li>3-E: lib/speech.ts (Web Speech API) + 마이크/TTS ChatInput 통합</li>
-          <li>3-F: /session/[id] 읽기 전용 페이지 + /history 타입 교체</li>
-          <li>3-G: 시각 회귀 spec 업데이트 + 동작 검증</li>
+          <li class="done">3-A: 불필요 코드 제거 (safety / ToneChips / InterpretationView / /result)</li>
+          <li class="done">3-B: 통합 시스템 프롬프트 (lib/prompts/chat.ts) + /api/chat 엔드포인트</li>
+          <li class="done">3-C: ChatView + ChatInput + MessageBubble + TypingIndicator 컴포넌트</li>
+          <li class="done">3-D: 홈 페이지 채팅 UI 전환 + IDB DreamSession CRUD (DB v2)</li>
+          <li class="done">3-E: lib/speech.ts (Web Speech API) + 마이크/TTS ChatInput 통합</li>
+          <li class="done">3-F: /session/[id] 읽기 전용 페이지 + /history 타입 교체</li>
+          <li class="done">3-G: 시각 회귀 spec 업데이트 + 동작 검증 → main 머지</li>
+        </ul>
+      </div>
+
+      <!-- 3-C단계 (추가): PWA 품질 + 리팩토링 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">3-C단계 · PWA 품질 · 아이콘 · 리팩토링</div>
+          <div class="phase-meta">4/4 완료 ✅</div>
+        </div>
+        <ul class="checklist">
+          <li class="done">InstallButton 컴포넌트 — Android 네이티브 / iOS Safari 설치 가이드 모달 (포커스 트랩 포함)</li>
+          <li class="done">드림 테마 G 앱 아이콘 (SVG → PNG 192/512/apple-touch-icon) · theme_color #4f46e5 통일</li>
+          <li class="done">코드 리뷰 15개 이슈 수정 — streamChat 분리, modelId SSE 흐름, iOS Safari 감지, onerror, formatDate 공유, etc.</li>
+          <li class="done">lib/format.ts (formatDate 공통 모듈) 추출</li>
         </ul>
       </div>
 
@@ -624,13 +639,13 @@
       <div class="phase">
         <div class="phase-head">
           <div class="phase-title">4단계 · 배포</div>
-          <div class="phase-meta">0/4 · 예정</div>
+          <div class="phase-meta">1/4 · 진행 중</div>
         </div>
         <ul class="checklist">
-          <li>Vercel 프로덕션 배포</li>
+          <li class="done">Vercel 프로젝트 생성 + GitHub 레포 연결 (GEMINI_API_KEY 환경변수 설정)</li>
+          <li class="current">프로덕션 배포 검증</li>
           <li>OG 이미지 · SEO 메타</li>
-          <li>지인 5명 베타 테스트</li>
-          <li>피드백 수렴 → v1.1 계획</li>
+          <li>지인 5명 베타 테스트 → 피드백 수렴</li>
         </ul>
       </div>
     </section>
@@ -640,11 +655,10 @@
       <h2>지금 다음에 할 일</h2>
       <div class="next-list">
         <ol>
-          <li><strong>writing-plans 스킬로 Phase 3 구현 계획서 작성</strong> — 3-A~3-G 7단계를 task 단위로 분해</li>
-          <li>Phase 3-A 시작: 불필요 코드 제거 (lib/safety.ts · crisis-resources.ts · ToneChips · InterpretationView · SafetyResourceCard · /result/[id] 라우트)</li>
-          <li>Phase 3-B: 통합 시스템 프롬프트 (모든 스킬 임베드) + /api/chat 멀티턴 SSE 엔드포인트</li>
-          <li>Phase 3-C~F: 채팅 UI 컴포넌트 4종 + 홈 전환 + IDB v2 + 음성 I/O + /session/[id]</li>
-          <li>Phase 3-G: 시각 회귀 spec 업데이트 → accept-baseline 라벨 → PR 머지 → Vercel 배포</li>
+          <li>feature/writing-plan-phase-2 브랜치 커밋 + PR 생성 (사용자 액션)</li>
+          <li>PR 머지 후 Vercel 자동 배포 확인</li>
+          <li>OG 이미지 · SEO 메타 추가</li>
+          <li>지인 5명 베타 테스트 → 피드백 수렴 → v1.1 계획</li>
         </ol>
       </div>
     </section>

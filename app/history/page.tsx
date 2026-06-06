@@ -17,14 +17,22 @@ export default function HistoryPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    await deleteSession(id);
-    setSessions((prev) => prev.filter((s) => s.id !== id));
+    try {
+      await deleteSession(id);
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+    } catch {
+      // IDB failure — leave UI unchanged
+    }
   };
 
   const handleClearAll = async () => {
     if (!window.confirm('모든 대화를 삭제할까요?')) return;
-    await clearAll();
-    setSessions([]);
+    try {
+      await clearAll();
+      setSessions([]);
+    } catch {
+      // IDB failure — leave UI unchanged
+    }
   };
 
   return (

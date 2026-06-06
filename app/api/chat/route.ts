@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getChatStream } from '@/lib/llm';
+import { getChatStream, getModelId } from '@/lib/llm';
 import type { ChatSseEvent } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           const text = chunk.text ?? '';
           if (text) send({ type: 'chunk', text });
         }
-        send({ type: 'done', sessionId: parsed.sessionId });
+        send({ type: 'done', sessionId: parsed.sessionId, modelId: getModelId() });
       } catch (e) {
         send({ type: 'error', message: parseGeminiError(e) });
       } finally {

@@ -2,20 +2,13 @@
 
 import { Separator } from '@gugbab/styled-radix';
 import Link from 'next/link';
+import { formatDate } from '@/lib/format';
 import type { DreamSession } from '@/lib/types';
 import styles from './HistoryList.module.css';
 
 interface HistoryListProps {
   sessions: DreamSession[];
   onDelete?: (id: string) => void;
-}
-
-function formatDate(ms: number): string {
-  const d = new Date(ms);
-  const y = d.getFullYear();
-  const mo = String(d.getMonth() + 1).padStart(2, '0');
-  const da = String(d.getDate()).padStart(2, '0');
-  return `${y}-${mo}-${da}`;
 }
 
 export function HistoryList({ sessions, onDelete }: HistoryListProps) {

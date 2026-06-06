@@ -25,7 +25,7 @@ export function ChatView({ messages, streamingText, isStreaming }: ChatViewProps
         <p className={styles.empty}>어젯밤 꿈을 이야기해보세요 💬</p>
       )}
       {messages.map((m, i) => (
-        <MessageBubble key={`${i}-${m.timestamp}`} message={m} />
+        <MessageBubble key={String(m.timestamp)} message={m} />
       ))}
       {isStreaming && streamingText && (
         <MessageBubble

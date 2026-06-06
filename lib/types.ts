@@ -25,5 +25,5 @@ export interface DreamEntry {
 
 export type ChatSseEvent =
   | { type: 'chunk'; text: string }
-  | { type: 'done'; sessionId: string }
+  | { type: 'done'; sessionId: string; modelId: string }
   | { type: 'error'; message: string };
