@@ -39,9 +39,11 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
       setListening(false);
       return;
     }
+    recognizerRef.current?.abort();
     try {
       const rec = createRecognizer(
         (transcript) => setText(transcript),
+        () => setListening(false),
         () => setListening(false),
       );
       recognizerRef.current = rec;

@@ -3,17 +3,10 @@
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { ChatView } from '@/components/ChatView';
+import { formatDate } from '@/lib/format';
 import { getSession } from '@/lib/db';
 import type { DreamSession } from '@/lib/types';
 import styles from './page.module.css';
-
-function formatDate(ms: number): string {
-  const d = new Date(ms);
-  const y = d.getFullYear();
-  const mo = String(d.getMonth() + 1).padStart(2, '0');
-  const da = String(d.getDate()).padStart(2, '0');
-  return `${y}-${mo}-${da}`;
-}
 
 export default function SessionPage({
   params,

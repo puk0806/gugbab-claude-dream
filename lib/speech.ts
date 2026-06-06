@@ -20,6 +20,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   interimResults: boolean;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
   onend: (() => void) | null;
+  onerror: ((event: Event) => void) | null;
   start(): void;
   stop(): void;
   abort(): void;
@@ -45,6 +46,7 @@ export interface SpeechRecognizer {
 export function createRecognizer(
   onResult: (text: string, isFinal: boolean) => void,
   onEnd: () => void,
+  onError?: () => void,
 ): SpeechRecognizer {
   const w = window as unknown as Record<string, unknown>;
   const Ctor = (w.SpeechRecognition ?? w.webkitSpeechRecognition) as SpeechRecognitionCtor | undefined;
@@ -61,6 +63,7 @@ export function createRecognizer(
     onResult(result[0].transcript, result.isFinal);
   };
   rec.onend = onEnd;
+  rec.onerror = onError ?? null;
 
   return {
     start: () => rec.start(),
