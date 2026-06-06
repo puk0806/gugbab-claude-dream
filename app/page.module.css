@@ -22,6 +22,12 @@
   margin: 0;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--gugbab-space-2, 8px);
+}
+
 .historyLink {
   font-size: 14px;
   color: var(--gugbab-color-accent-base, #0090ff);
