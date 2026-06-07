@@ -8,4 +8,15 @@ const withSerwist = withSerwistInit({
 
 export default withSerwist({
   reactStrictMode: true,
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          // Allow microphone and camera for Web Speech API (SpeechRecognition)
+          { key: 'Permissions-Policy', value: 'microphone=(self), camera=()' },
+        ],
+      },
+    ];
+  },
 });
