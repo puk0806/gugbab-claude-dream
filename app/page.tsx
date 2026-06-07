@@ -8,7 +8,7 @@ import { ChatView } from '@/components/ChatView';
 import { HistoryList } from '@/components/HistoryList';
 import { InstallButton } from '@/components/install/InstallButton';
 import { listSessionsDesc, saveSession } from '@/lib/db';
-import { speak } from '@/lib/speech';
+import { useSpeak } from '@/lib/speech';
 import type { ChatMessage, ChatSseEvent, DreamSession } from '@/lib/types';
 import styles from './page.module.css';
 
@@ -71,6 +71,7 @@ export default function HomePage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const { speak, supported: ttsSupported } = useSpeak();
 
   useEffect(() => {
     listSessionsDesc(3)
@@ -126,7 +127,7 @@ export default function HomePage() {
             modelId,
           };
           setSession(finalSession);
-          if (ttsEnabled) speak(accumulated);
+          if (ttsEnabled && ttsSupported) speak(accumulated);
           try {
             await saveSession(finalSession);
           } catch {
