@@ -18,6 +18,7 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInputProps) {
   const [text, setText] = useState('');
+  const [interimText, setInterimText] = useState('');
   const [listening, setListening] = useState(false);
   const [micError, setMicError] = useState<string>('');
   const [recognitionAvailable, setRecognitionAvailable] = useState(false);
@@ -40,15 +41,35 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
     if (listening) {
       recognizerRef.current?.stop();
       setListening(false);
+      setInterimText('');
       return;
     }
     recognizerRef.current?.abort();
+
+    // 마이크 사용 시 TTS 자동 활성화 — 음성 입력이면 음성 출력도 켜는 게 자연스러운 흐름
+    if (!ttsEnabled && ttsAvailable) {
+      onTtsToggle();
+    }
+
     try {
       const rec = createRecognizer(
-        (transcript) => setText(transcript),
-        () => setListening(false),
+        (transcript, isFinal) => {
+          if (isFinal) {
+            // 최종 결과만 실제 입력에 반영 (interim 덮어쓰기 방지)
+            setText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+            setInterimText('');
+          } else {
+            // 중간 결과는 힌트로만 표시
+            setInterimText(transcript);
+          }
+        },
+        () => {
+          setListening(false);
+          setInterimText('');
+        },
         (type: MicError) => {
           setListening(false);
+          setInterimText('');
           if (type === 'not-allowed') {
             setMicError('마이크 권한이 필요합니다. 브라우저 설정에서 허용해주세요.');
           } else if (type === 'network') {
@@ -65,13 +86,14 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
       setListening(false);
       setMicError('음성 인식을 시작할 수 없습니다.');
     }
-  }, [listening]);
+  }, [listening, ttsEnabled, ttsAvailable, onTtsToggle]);
 
   const handleSubmit = () => {
     const trimmed = text.trim();
     if (!trimmed || disabled) return;
     recognizerRef.current?.abort();
     setListening(false);
+    setInterimText('');
     onSend(trimmed);
     setText('');
   };
@@ -81,6 +103,11 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
       {micError && (
         <p className={styles.micError} role="alert">
           {micError}
+        </p>
+      )}
+      {interimText && (
+        <p className={styles.interimHint} aria-live="polite">
+          {interimText}
         </p>
       )}
       <div className={styles.bar}>
@@ -106,7 +133,7 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
               handleSubmit();
             }
           }}
-          placeholder="꿈을 이야기해보세요"
+          placeholder={listening ? '듣는 중...' : '꿈을 이야기해보세요'}
           rows={1}
           disabled={disabled}
           aria-label="꿈 입력"

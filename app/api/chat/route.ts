@@ -75,6 +75,8 @@ export async function POST(req: NextRequest): Promise<Response> {
       'content-type': 'text/event-stream; charset=utf-8',
       'cache-control': 'no-cache',
       connection: 'keep-alive',
+      // Vercel/nginx 프록시 버퍼링 비활성화 — SSE 청크가 즉시 클라이언트에 전달됨
+      'x-accel-buffering': 'no',
     },
   });
 }

@@ -70,6 +70,11 @@ export default function HomePage() {
   const [streamingText, setStreamingText] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [ttsEnabled, setTtsEnabled] = useState(false);
+
+  // SSR hydration mismatch 방지 — 마운트 후 localStorage에서 읽음
+  useEffect(() => {
+    setTtsEnabled(localStorage.getItem('tts-enabled') === 'true');
+  }, []);
   const [errorMsg, setErrorMsg] = useState('');
   const { speak, supported: ttsSupported } = useSpeak();
 
@@ -188,7 +193,13 @@ export default function HomePage() {
         onSend={sendMessage}
         disabled={isStreaming}
         ttsEnabled={ttsEnabled}
-        onTtsToggle={() => setTtsEnabled((v) => !v)}
+        onTtsToggle={() =>
+          setTtsEnabled((v) => {
+            const next = !v;
+            localStorage.setItem('tts-enabled', String(next));
+            return next;
+          })
+        }
       />
 
       {recentSessions.length > 0 && !session && (
