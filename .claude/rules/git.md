@@ -9,7 +9,7 @@ body (선택, 72자 이내)
 footer (선택)
 ```
 
-**category:** `agent` | `skill` | `app` | `test` | `docs` | `config`
+**category:** `agent` | `skill` | `docs` | `config`
 
 ## Type
 
@@ -46,25 +46,21 @@ footer (선택)
 
 하나의 작업이 여러 관심사에 걸치면 관심사별로 커밋을 나눈다.
 
-| 관심사 | 카테고리 | 예시 |
-|--------|---------|------|
-| 스킬 파일 | `[skill]` | `.claude/skills/**/SKILL.md` |
-| 에이전트 파일 | `[agent]` | `.claude/agents/**/*.md` |
-| 어플리케이션 코드 | `[app]` | `app/`, `lib/`, `components/`, `scripts/`, `public/` |
-| 테스트 코드 | `[test]` | `e2e/`, `__tests__/`, `*.test.ts` |
-| 설정·빌드·CI | `[config]` | `package.json`, `tsconfig.json`, `next.config.ts`, `biome.json`, `playwright.config.ts`, `.env.example`, `.gitignore`, `.github/workflows/`, `CLAUDE.md`, `.claude/rules/`, `.claude/settings.json`, `.claude/hooks/` |
-| 문서 | `[docs]` | `README.md`, `docs/`, `verification.md`, `AGENTS.md` |
+| 관심사 | 예시 |
+|--------|------|
+| 스킬 파일 | SKILL.md 추가·수정 |
+| 에이전트 파일 | agent MD 추가·수정 |
+| 설정·규칙 | CLAUDE.md, rules/, settings.json, hooks/ |
+| 문서 | README.md, docs/, verification.md |
 
 **분리 기준:**
 - `[skill]`과 `[agent]`는 항상 별도 커밋
-- `[app]`과 `[test]`는 항상 별도 커밋 (테스트 변경 추적성 확보)
 - `[config]` 변경과 `[docs]` 변경은 별도 커밋
-- 같은 category 내에서도 변경 목적이 다르면 분리 가능 (예: `[docs] Add` vs `[docs] Modify`)
+- 같은 category 내에서도 변경 목적이 다르면 분리 가능
 
 **하나로 묶어도 되는 경우:**
 - 동일 스킬의 SKILL.md + verification.md (한 작업의 산출물)
 - 에이전트 추가 + 해당 에이전트 문서
-- 동일 컴포넌트의 .tsx + .module.css (한 컴포넌트의 산출물 — `[app]` 단일 커밋)
 
 ## 예시
 
@@ -82,15 +78,4 @@ footer (선택)
 [agent] Add: rust-backend-developer, rust-backend-architect
 [config] Improve: skill-creator 검증 프로세스 강화
 [docs] Add: 백엔드 스킬 verification.md 15종 및 README 업데이트
-```
-
-```
-# 어플리케이션 코드 + 테스트 분리 예시 (Phase 2 같은 핵심 기능 구현 시)
-
-[config] Add: @anthropic-ai/sdk · idb · zod 의존성
-[app] Add: lib/claude.ts · lib/safety.ts · lib/db.ts (Phase 2 핵심 로직)
-[app] Add: 컴포넌트 5종 (DreamInput · ToneChips · InterpretationView · SafetyResourceCard · HistoryList)
-[app] Add: 라우트 3종 (/ · /result/[id] · /history) + API Route /api/interpret
-[test] Add: e2e/visual spec 확장 (routes 3건 + components 4건 + SSE mock fixture)
-[docs] Modify: Phase 2 완료 반영 (todo.md · dream-app.html)
 ```
