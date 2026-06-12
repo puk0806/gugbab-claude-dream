@@ -13,7 +13,8 @@ metadata:
 
 **How to apply:**
 - **작업 시작 전 반드시 `git branch --show-current` + `git log origin/main --oneline -3` 으로 현재 브랜치와 main 상태 먼저 확인**
-- **현재 브랜치가 이미 main에 머지된 브랜치면 절대 그 브랜치에 커밋하지 않는다** — PR #4, PR #5에서 두 번 반복한 실수
+- **현재 브랜치가 이미 main에 머지된 브랜치면 절대 그 브랜치에 커밋하지 않는다** — PR #4, PR #5에서 반복한 실수
+- **현재 브랜치가 다른 목적의 feature 브랜치라도 새 작업은 절대 그 위에 얹지 않는다** — 예: `feature/fix-mic-tts-streaming`에서 에이전트 정리 작업을 커밋한 것은 잘못. 작업 목적이 다르면 무조건 새 브랜치
 - **새 작업 = 반드시 `git checkout main && git pull` → `git checkout -b feature/<작업내용>` 순서** — 예외 없음
 - 이전 feature 브랜치에 이어서 커밋하면 이미 머지된 커밋이 중복 포함되어 conflict 발생
 - 작업 진행 + 커밋은 [[feedback-html-dashboard]] 룰과 함께 적용 + CLAUDE.md `git.md` 분리 룰([skill]/[agent]/[config]/[docs]) 준수
