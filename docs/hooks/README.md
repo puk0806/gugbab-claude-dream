@@ -36,8 +36,7 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 29종).
 
 | 훅 | 이벤트 | 설명 |
 |----|--------|------|
-| [pre-commit-quality.js](../../.claude/hooks/pre-commit-quality.js) | PreToolUse Bash | git commit 직전 typecheck(tsc --noEmit) + biome check 강제 — 실패 시 커밋 차단 |
-| [tdd-guard.js](../../.claude/hooks/tdd-guard.js) | PostToolUse Write/Edit | 소스 파일 수정 시 대응 테스트 파일 존재 여부 검사 (경고만, 차단 안 함) |
+| [tdd-guard.js](../../.claude/hooks/tdd-guard.js) | PostToolUse Write/Edit | 소스 파일 수정 시 대응 테스트 파일 존재 여부 검사 — 없으면 차단 (hooks/commands/scripts/ 제외) |
 | [test-fake-guard.js](../../.claude/hooks/test-fake-guard.js) | PostToolUse Write | 테스트 코드에서 가짜 패스(skip/mock 남용 등) 탐지 차단 |
 | [verification-gate.js](../../.claude/hooks/verification-gate.js) | Stop | 소스 파일 수정 후 테스트 파일 변경 없으면 경고 출력 (차단 안 함) |
 | [careful-with-judge.js](../../.claude/hooks/careful-with-judge.js) | PreToolUse Bash | rm -rf 분석 — 시스템·.git·홈 삭제는 차단, 그 외는 경고 |
@@ -70,6 +69,14 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 29종).
 
 ---
 
+## 브랜치 보호 훅 (1종) — Branch Protection 선택 시
+
+| 훅 | 이벤트 | 설명 |
+|----|--------|------|
+| [branch-protection.js](../../.claude/hooks/branch-protection.js) | PreToolUse Bash | main 브랜치로 직접 push 차단(PR 필수) + 피처 브랜치에서 새 브랜치 생성 차단(main에서만 허용) |
+
+---
+
 ## 훅 계층 구조
 
 ```
@@ -77,5 +84,6 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 29종).
 ├── 개발 전용 (4종)  ← react-spa·nextjs·rust-axum·java-spring-*·unity-game
 │   └── TypeScript (1종)  ← react-spa·nextjs만 추가
 ├── Memory (3종)    ← --memory 옵션 선택 시 추가
-└── Codex (1종)     ← --codex 옵션 선택 시 추가
+├── Codex (1종)     ← --codex 옵션 선택 시 추가
+└── Branch Protection (1종)  ← --branch-protection 옵션 선택 시 추가
 ```
