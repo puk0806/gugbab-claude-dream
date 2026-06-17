@@ -133,6 +133,10 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/main-branch-guard.js"
+          },
+          {
+            "type": "command",
             "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit-quality.js"
           },
           {

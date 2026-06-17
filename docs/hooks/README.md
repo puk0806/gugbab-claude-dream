@@ -1,6 +1,6 @@
 # 훅 (Hooks)
 
-Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 29종).
+Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 30종).
 
 훅 파일 위치: `.claude/hooks/`
 
@@ -12,6 +12,7 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 29종).
 |----|--------|------|
 | [_lib.js](../../.claude/hooks/_lib.js) | — | 훅 공통 유틸리티 모듈 — 프로젝트 해시·상태 파일·핸드오프 경로 |
 | [bash-guard.js](../../.claude/hooks/bash-guard.js) | PreToolUse Bash | 위험한 Bash 명령어 패턴 차단 — git rm, rm -rf, SKILL.md sed 수정 등 |
+| [main-branch-guard.js](../../.claude/hooks/main-branch-guard.js) | PreToolUse Bash | main 브랜치 직접 커밋·푸시 강제 차단 — feature 브랜치 생성 요구 |
 | [auto-approve.js](../../.claude/hooks/auto-approve.js) | PreToolUse | Bash를 제외한 도구 자동 승인 (Bash 보안은 bash-guard.js가 담당) |
 | [parry.js](../../.claude/hooks/parry.js) | PreToolUse Write | 시크릿·프롬프트 인젝션 패턴 스캔 — 감지 시 저장 차단 |
 | [protect-secrets.js](../../.claude/hooks/protect-secrets.js) | PreToolUse Write/Edit | 민감 파일(.env, *.pem, *.key, credentials 등) 수정 차단 |
