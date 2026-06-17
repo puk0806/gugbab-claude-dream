@@ -31,11 +31,11 @@ export const FIXTURE_SCRIPT = `
 `;
 
 export function makeSeedSessionScript(opts: {
-  id: string;
-  summary: string;
-  messages: Array<{ role: 'user' | 'model'; content: string; timestamp: number }>;
+    id: string;
+    summary: string;
+    messages: Array<{ role: "user" | "model"; content: string; timestamp: number }>;
 }): string {
-  return `
+    return `
     indexedDB.deleteDatabase('gugbab-dream');
     const req = indexedDB.open('gugbab-dream', 2);
     req.onupgradeneeded = () => {
@@ -53,12 +53,12 @@ export function makeSeedSessionScript(opts: {
       const db = req.result;
       const tx = db.transaction('sessions', 'readwrite');
       tx.objectStore('sessions').put(${JSON.stringify({
-        id: opts.id,
-        createdAt: Date.UTC(2026, 4, 21, 0, 0, 0),
-        messages: opts.messages,
-        summary: opts.summary,
-        modelId: 'gemini-2.5-flash',
-        schemaVersion: 2,
+          id: opts.id,
+          createdAt: Date.UTC(2026, 4, 21, 0, 0, 0),
+          messages: opts.messages,
+          summary: opts.summary,
+          modelId: "gemini-2.5-flash",
+          schemaVersion: 2,
       })});
     };
   `;

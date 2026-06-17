@@ -10,8 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--gugbab-space-4, 16px) var(--gugbab-space-4, 16px)
-    var(--gugbab-space-3, 12px);
+  padding: var(--gugbab-space-4, 16px) var(--gugbab-space-4, 16px) var(--gugbab-space-3, 12px);
   border-bottom: 1px solid var(--gugbab-color-border-base, #cdced6);
 }
 

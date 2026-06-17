@@ -10,7 +10,9 @@
   border: 1px solid var(--gugbab-color-accent-base, #0090ff);
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
   white-space: nowrap;
 }
 

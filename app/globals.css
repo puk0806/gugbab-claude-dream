@@ -9,9 +9,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "SF Pro KR", "Noto Sans KR", "Apple SD Gothic Neo",
-    sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro KR", "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
 }
 
 body {
