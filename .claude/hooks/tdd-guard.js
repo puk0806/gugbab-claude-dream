@@ -1,4 +1,4 @@
-// PostToolUse Write|Edit — 소스 파일 수정 시 대응 테스트 파일 존재 여부 검사 (경고만, 차단 안 함)
+// PostToolUse Write|Edit — 소스 파일 수정 시 대응 테스트 파일 존재 여부 검사 (없으면 차단)
 const fs = require('fs');
 const path = require('path');
 
@@ -41,8 +41,11 @@ try {
   });
 
   if (!hasTest) {
-    process.stderr.write(`[tdd-guard] ⚠️  테스트 없음: ${path.relative(process.cwd(), filePath)}\n`);
-    process.stderr.write(`[tdd-guard] 권장: ${basename}.test${ext} 작성\n`);
+    process.stdout.write(
+      `[tdd-guard] 테스트 파일 없음: ${path.relative(process.cwd(), filePath)}\n` +
+      `즉시 생성하세요: ${basename}.test${ext}\n`
+    );
+    process.exit(2);
   }
 } catch {}
 

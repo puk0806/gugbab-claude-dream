@@ -47,11 +47,7 @@ function isRootReadme(filePath) {
   if (!filePath.endsWith('README.md')) return false
   const projectDir = process.env.CLAUDE_PROJECT_DIR
   if (projectDir) {
-    // 절대경로 비교 + 상대경로(session-summary.js가 raw file_path 기록)도 허용
-    const abs = path.isAbsolute(filePath)
-      ? path.normalize(filePath)
-      : path.normalize(path.join(projectDir, filePath))
-    return abs === path.normalize(path.join(projectDir, 'README.md'))
+    return path.normalize(filePath) === path.normalize(path.join(projectDir, 'README.md'))
   }
   const normalized = filePath.replace(/\\/g, '/')
   return !normalized.match(/\/_radix-reference\/|\/node_modules\/|\/packages\/[^/]+\/README|\/apps\/[^/]+\/README|\/docs\/[^/]+\/README/)
