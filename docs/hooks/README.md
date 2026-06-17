@@ -1,6 +1,6 @@
 # 훅 (Hooks)
 
-Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 28종).
+Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 29종).
 
 훅 파일 위치: `.claude/hooks/`
 
@@ -36,6 +36,7 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 28종).
 
 | 훅 | 이벤트 | 설명 |
 |----|--------|------|
+| [pre-commit-quality.js](../../.claude/hooks/pre-commit-quality.js) | PreToolUse Bash | git commit 직전 typecheck(tsc --noEmit) + biome check 강제 — 실패 시 커밋 차단 |
 | [tdd-guard.js](../../.claude/hooks/tdd-guard.js) | PostToolUse Write/Edit | 소스 파일 수정 시 대응 테스트 파일 존재 여부 검사 (경고만, 차단 안 함) |
 | [test-fake-guard.js](../../.claude/hooks/test-fake-guard.js) | PostToolUse Write | 테스트 코드에서 가짜 패스(skip/mock 남용 등) 탐지 차단 |
 | [verification-gate.js](../../.claude/hooks/verification-gate.js) | Stop | 소스 파일 수정 후 테스트 파일 변경 없으면 경고 출력 (차단 안 함) |
