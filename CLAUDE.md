@@ -1,14 +1,12 @@
-# CLAUDE.md — gugbab claude dream
+# CLAUDE.md — gugbab-claude-dream
 
-꿈해몽 어플리케이션
+Next.js App Router (TypeScript) — 꿈해몽
 
 ---
 
-## 컨텍스트 관리
+## 필수 원칙
 
-- 관련 없는 작업 사이에는 `/clear`로 컨텍스트 초기화
-- 같은 실수를 2번 이상 수정하면 `/clear` 후 더 구체적인 프롬프트로 재시작
-- 파일을 많이 읽는 조사 작업은 서브에이전트에 위임
+- 복잡한 작업 전 계획 확인 → @.claude/rules/task-workflow.md
 
 ---
 
@@ -19,18 +17,21 @@
 - API 키·토큰·비밀번호를 파일에 직접 작성 금지
 - 검증되지 않은 외부 소스 그대로 복붙 금지
 - 테스트되지 않은 에이전트를 main 브랜치에 직접 커밋 금지
-- **verification.md, SKILL.md를 Bash(sed/awk 등)로 수정 금지** — 반드시 Write/Edit 도구 사용
-- **PENDING_TEST → APPROVED 일괄 전환 금지** — 스킬별 개별 검증 필수 (@.claude/rules/verification-policy.md)
+- `use client` 남용 금지 — Server Component 기본, 상호작용 필요한 부분만 클라이언트 컴포넌트
+- `any` 타입 사용 금지 — `unknown` + 타입 가드로 대체
+- `console.log` 프로덕션 코드에 남기지 않기
 
 ---
 
-## 상황별 규칙 참조
+## 규칙 참조
 
 | 상황 | 참조 파일 |
 |------|----------|
+| 작업 착수 전 확인 | @.claude/rules/task-workflow.md |
 | Git 커밋 컨벤션 | @.claude/rules/git.md |
 | 외부 정보 조사·검증 | @.claude/rules/info-verification.md |
+| TypeScript 코딩 규칙 | @.claude/rules/typescript.md |
 | 에이전트 설계·작성 | @.claude/rules/agent-design.md |
-| 스킬·에이전트 생성 절차 | @.claude/rules/creation-workflow.md |
+| 슬래시 커맨드 작성 | @.claude/rules/commands.md |
 | README 업데이트 | @.claude/rules/readme-update.md |
-| 검증 정책·APPROVED 전환 | @.claude/rules/verification-policy.md |
+| Codex 적대적 코드 리뷰 | @.claude/rules/codex-review.md |

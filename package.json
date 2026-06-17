@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "@google/genai": "^2.6.0",
-    "@gugbab/hooks": "^1.0.1",
-    "@gugbab/styled-radix": "^1.0.1",
-    "@gugbab/tokens": "^1.0.0",
-    "@gugbab/utils": "^1.0.1",
+    "@gugbab/hooks": "1.0.1",
+    "@gugbab/styled-radix": "1.0.2",
+    "@gugbab/tokens": "1.0.0",
+    "@gugbab/utils": "1.0.1",
     "@serwist/next": "^9.5.11",
     "idb": "^8.0.3",
     "next": "16.2.6",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
-    "@gugbab/biome-config": "^1.0.0",
+    "@gugbab/biome-config": "1.0.1",
     "@playwright/test": "^1.60.0",
     "@types/node": "^20",
     "@types/react": "^19",

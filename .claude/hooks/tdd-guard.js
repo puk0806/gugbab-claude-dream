@@ -21,7 +21,8 @@ try {
     basename.includes('_test') ||
     filePath.includes('__tests__') ||
     filePath.includes('.claude/hooks') ||
-    filePath.includes('.claude/commands')
+    filePath.includes('.claude/commands') ||
+    /(?:^|\/)scripts\//.test(filePath)
   ) {
     process.exit(0);
   }
@@ -30,7 +31,9 @@ try {
     path.join(dir, `${basename}.test${ext}`),
     path.join(dir, `${basename}.spec${ext}`),
     path.join(dir, '__tests__', `${basename}.test${ext}`),
+    path.join(dir, '__tests__', `${basename}.spec${ext}`),
     path.join(path.dirname(dir), '__tests__', `${basename}.test${ext}`),
+    path.join(path.dirname(dir), '__tests__', `${basename}.spec${ext}`),
   ];
 
   const hasTest = testPatterns.some(p => {

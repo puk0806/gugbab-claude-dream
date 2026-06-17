@@ -12,16 +12,16 @@ importers:
         specifier: ^2.6.0
         version: 2.6.0
       '@gugbab/hooks':
-        specifier: ^1.0.1
+        specifier: 1.0.1
         version: 1.0.1(react@19.2.4)
       '@gugbab/styled-radix':
-        specifier: ^1.0.1
-        version: 1.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: 1.0.2
+        version: 1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@gugbab/tokens':
-        specifier: ^1.0.0
+        specifier: 1.0.0
         version: 1.0.0
       '@gugbab/utils':
-        specifier: ^1.0.1
+        specifier: 1.0.1
         version: 1.0.1
       '@serwist/next':
         specifier: ^9.5.11
@@ -49,8 +49,8 @@ importers:
         specifier: ^2.4.15
         version: 2.4.15
       '@gugbab/biome-config':
-        specifier: ^1.0.0
-        version: 1.0.0(@biomejs/biome@2.4.15)
+        specifier: 1.0.1
+        version: 1.0.1(@biomejs/biome@2.4.15)
       '@playwright/test':
         specifier: ^1.60.0
         version: 1.60.0
@@ -320,8 +320,8 @@ packages:
       '@modelcontextprotocol/sdk':
         optional: true
 
-  '@gugbab/biome-config@1.0.0':
-    resolution: {integrity: sha512-Jbo3Y5zBZZ+518FRZhJQs92bMqibipr1odqy73GHn+7aKwA5ZsKtfjXbg60zcIKNVw+ki9n20aRB9xyffBcgIw==}
+  '@gugbab/biome-config@1.0.1':
+    resolution: {integrity: sha512-A4Nsyvp9EGV4yzlS48Eq+fUyhRz36rMWKirVnkm3Dbe4iwZEIP1uyyL7mK26/gsEawfTK8quznxu+K+1zXgnwA==}
     peerDependencies:
       '@biomejs/biome': '>=2.0.0'
 
@@ -338,8 +338,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@gugbab/styled-radix@1.0.1':
-    resolution: {integrity: sha512-alzhSFuDfJH97KKHcwa7WvvvEYEM4kgCwIFRDH48+A9un4BiTN5MUyBZmqsnfeg/ZQBzwKZMuysJedYmdZEE1w==}
+  '@gugbab/styled-radix@1.0.2':
+    resolution: {integrity: sha512-Izpn8H5vm9w/XRz31vvqsAtTX72gz1E65heyUAkjtydM5KplW4zcR0KJiDONQR/jyK6PsWnNu21cJw0zDU5K8g==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: '>=18'
@@ -1167,7 +1167,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@gugbab/biome-config@1.0.0(@biomejs/biome@2.4.15)':
+  '@gugbab/biome-config@1.0.1(@biomejs/biome@2.4.15)':
     dependencies:
       '@biomejs/biome': 2.4.15
 
@@ -1184,7 +1184,7 @@ snapshots:
       '@gugbab/utils': 1.0.1
       react: 19.2.4
 
-  '@gugbab/styled-radix@1.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@gugbab/styled-radix@1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@gugbab/headless': 1.0.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@gugbab/tokens': 1.0.0
