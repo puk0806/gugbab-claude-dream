@@ -12,6 +12,7 @@ metadata:
 **Why:** 사용자가 명시적으로 요청 — "앞으로 진행은 작업에 관련된 피처를 따고 pr통해서 머지 할거야 pr 생성은 내가 직접 할거고" (2026-05-21). 시각 회귀 워크플로우(`.github/workflows/visual-regression.yml` + `__diff_archive__/pr-N/`)도 PR 기반 흐름을 전제로 설계됐고, PR 단위의 시각 변화 history 추적이 의도된 모델. 사용자가 직접 PR을 만들면서 변경 범위를 한 번 더 확인하는 게이트 역할.
 
 **How to apply:**
+- **세션 시작 또는 이어받기(컨텍스트 요약 후 재개) 시 제일 먼저 `git branch --show-current` 확인 — main이면 즉시 feature 브랜치로 전환 후 작업**
 - **작업 시작 전 반드시 `git branch --show-current` + `git log origin/main --oneline -3` 으로 현재 브랜치와 main 상태 먼저 확인**
 - **현재 브랜치가 이미 main에 머지된 브랜치면 절대 그 브랜치에 커밋하지 않는다** — PR #4, PR #5에서 두 번 반복한 실수
 - **새 작업 = 반드시 `git checkout main && git pull` → `git checkout -b feature/<작업내용>` 순서** — 예외 없음
