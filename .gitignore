@@ -58,3 +58,6 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Claude Code hooks — 런타임 마커 (로컬 전용)
+.claude/.codex-review-done
