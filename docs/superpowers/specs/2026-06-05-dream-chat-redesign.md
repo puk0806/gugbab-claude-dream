@@ -6,6 +6,11 @@
 - **이전 스펙**: [2026-05-16-dream-app-design.md](./2026-05-16-dream-app-design.md)
 - **배경**: Phase 2 동작 검증 완료 후 UX 전면 재설계. 채팅 + 음성 I/O + 품질 개선.
 
+> **⚠️ 후속 변경 (2026-07-08)**: 이 문서의 LLM 레이어(Gemini 2.5 Flash 직접 호출, `GEMINI_API_KEY`)는
+> **gugbab-claude-relay 프록시 경유 Claude**(deep: opus-4-8 / fast: haiku-4-5, `RELAY_URL`·`RELAY_SECRET`)로 대체됨.
+> `/api/chat` 엔드포인트·SSE 이벤트 계약(`chunk`/`done`/`error`)은 그대로 유지.
+> 최신 상태는 [2026-05-16-dream-app-todo.md](./2026-05-16-dream-app-todo.md) 3.5단계와 `dream-app.html` 참조.
+
 ---
 
 ## 1. 재설계 배경

@@ -439,16 +439,17 @@
   <section class="slide active" data-slide="0">
     <div class="cover" style="margin: auto;">
       <h1>꿈해몽 PWA</h1>
-      <p>채팅 + 음성으로 꿈을 말하면 스킬·에이전트 지식 기반 Gemini가 대화형으로 해몽 — Phase 3 시나리오 시각화</p>
+      <p>채팅 + 음성으로 꿈을 말하면 스킬·에이전트 지식 기반 Claude(gugbab-claude-relay 경유)가 대화형으로 해몽 — Phase 3 + 모델 선택 시나리오 시각화</p>
       <div class="toc">
         <div><strong>S1.</strong><span>채팅 홈 — 첫 꿈 대화 시작</span></div>
         <div><strong>S2.</strong><span>멀티턴 대화 — 세부 정보로 해석 깊어짐</span></div>
-        <div><strong>S3.</strong><span>음성 입력 — 마이크로 꿈 말하기</span></div>
-        <div><strong>S4.</strong><span>TTS 출력 — AI 해몽을 음성으로 듣기</span></div>
-        <div><strong>S5.</strong><span>히스토리 — 세션 목록 / 과거 대화 복원</span></div>
-        <div><strong>S6.</strong><span>히스토리 정리 — 단건 / 전체 삭제</span></div>
-        <div><strong>S7.</strong><span>PWA 설치 + 오프라인 안내</span></div>
-        <div><strong>+</strong><span>예외 — API 키 누락 / 5xx / IDB 차단</span></div>
+        <div><strong>S3.</strong><span>모델 선택 — 칩 → 바텀시트 → 다음 메시지부터 적용</span></div>
+        <div><strong>S4.</strong><span>음성 입력 — 마이크로 꿈 말하기</span></div>
+        <div><strong>S5.</strong><span>TTS 출력 — AI 해몽을 음성으로 듣기</span></div>
+        <div><strong>S6.</strong><span>히스토리 — 세션 목록 / 과거 대화 복원</span></div>
+        <div><strong>S7.</strong><span>히스토리 정리 — 단건 / 전체 삭제</span></div>
+        <div><strong>S8.</strong><span>PWA 설치 + 오프라인 안내</span></div>
+        <div><strong>+</strong><span>예외 — relay 미설정 / relay 5xx / IDB 차단</span></div>
       </div>
       <div class="hint">
         <kbd>←</kbd> <kbd>→</kbd> 키 또는 하단 버튼으로 슬라이드 이동
@@ -459,7 +460,7 @@
   <!-- ========== S1: 채팅 홈 — 첫 꿈 대화 ========== -->
   <section class="slide" data-slide="1">
     <div class="slide-header">
-      <span class="slide-num">S1 / 8</span>
+      <span class="slide-num">S1 / 9</span>
       <h1>채팅 홈 — 첫 꿈 대화 시작</h1>
     </div>
     <h2>홈 진입 → 텍스트로 꿈 입력 → AI 해몽 + 후속 질문 → IDB 세션 저장</h2>
@@ -474,7 +475,7 @@
       <div class="step">
         <div class="phone">
           <div class="phone-status"><span>2:14 AM</span><span>📶 100%</span></div>
-          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
+          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:9px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:2px 8px;">Sonnet ▾</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
           <div class="phone-content">
             <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--phone-muted);font-size:11px;text-align:center;padding:24px 0;">
               <div style="font-size:28px;">🌙</div>
@@ -496,7 +497,7 @@
       <div class="step">
         <div class="phone">
           <div class="phone-status"><span>2:15 AM</span><span>📶 100%</span></div>
-          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
+          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:9px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:2px 8px;">Sonnet ▾</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
           <div class="phone-content">
             <div style="display:flex;flex-direction:column;gap:8px;">
               <div style="align-self:flex-end;background:#0090ff;color:#fff;padding:7px 11px;border-radius:16px 16px 4px 16px;font-size:10px;max-width:78%;line-height:1.4;">
@@ -559,10 +560,10 @@
   <!-- ========== S2: 멀티턴 — 해석 깊어짐 ========== -->
   <section class="slide" data-slide="2">
     <div class="slide-header">
-      <span class="slide-num">S2 / 8</span>
+      <span class="slide-num">S2 / 9</span>
       <h1>멀티턴 대화 — 세부 정보로 해석 깊어짐</h1>
     </div>
-    <h2>후속 질문 → 세부 정보 추가 → Gemini가 맥락 반영해 더 정확한 해석 제공</h2>
+    <h2>후속 질문 → 세부 정보 추가 → Claude가 맥락 반영해 더 정확한 해석 제공</h2>
     <div class="meta-row">
       <div class="chip"><strong>핵심</strong>messages 배열 전체 전달 → 맥락 완전 유지</div>
       <div class="chip"><strong>자산 효과</strong>빨간 뱀 → 한국전통 + 융 심리학 동시 반영</div>
@@ -661,10 +662,91 @@
     </div>
   </section>
 
-  <!-- ========== S3: 음성 입력 ========== -->
+  <!-- ========== S3: 모델 선택 ========== -->
   <section class="slide" data-slide="3">
     <div class="slide-header">
-      <span class="slide-num">S3 / 8</span>
+      <span class="slide-num">S3 / 9</span>
+      <h1>모델 선택 — 칩 → 바텀시트 → 다음 메시지부터 적용</h1>
+    </div>
+    <h2>헤더 모델 칩 탭 → relay 모델 목록 바텀시트 → 선택 즉시 저장(localStorage) · 다음 메시지부터 적용</h2>
+    <div class="meta-row">
+      <div class="chip"><strong>데이터 소스</strong>relay GET /api/models (5분 캐시 프록시)</div>
+      <div class="chip"><strong>기본값</strong>sonnet · 저장 키 gugbab-dream:model</div>
+      <div class="chip"><strong>모델 4종</strong>haiku · sonnet · opus · fable</div>
+    </div>
+
+    <div class="flow">
+      <!-- Step 1: 헤더 모델 칩 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 9:02</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:9px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:2px 8px;outline:2px solid var(--primary);">Sonnet ▾</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
+          <div class="phone-content">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:var(--phone-muted);font-size:11px;text-align:center;padding:24px 0;">
+              <div style="font-size:28px;">🌙</div>
+              <div>어젯밤 꿈을 말해보세요</div>
+            </div>
+          </div>
+          <div style="border-top:1px solid var(--phone-border);padding:8px;display:flex;gap:6px;align-items:center;background:var(--phone-surface);">
+            <span style="font-size:16px;">🎤</span>
+            <div style="flex:1;border:1px solid var(--phone-border);border-radius:18px;padding:6px 10px;font-size:10px;color:var(--phone-muted);background:var(--phone-elevated);">꿈을 말해보세요...</div>
+            <span style="font-size:14px;color:var(--phone-muted);">🔊</span>
+            <button class="submit-btn disabled" style="padding:5px 10px;font-size:10px;">전송</button>
+          </div>
+        </div>
+        <div class="step-label"><strong>1. 헤더 모델 칩</strong>현재 모델(Sonnet) 표시 · 목록 로드 전엔 "모델"로 비활성 · 스트리밍 중 비활성</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 2: 바텀시트 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 9:02</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:9px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:2px 8px;">Sonnet ▾</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
+          <div class="phone-content" style="position:relative;">
+            <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);border-radius:4px;"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:12px 12px 0 0;padding:8px 6px;display:flex;flex-direction:column;gap:2px;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 5px;font-size:9px;font-weight:700;">모델 선택 <span style="font-size:7px;font-weight:500;color:var(--phone-muted);">다음 메시지부터 적용</span></div>
+              <div style="display:flex;gap:5px;padding:4px;border-radius:6px;"><span style="width:8px;"></span><span><span style="font-size:8px;font-weight:600;display:block;">Claude Haiku 4.5</span><span style="font-size:7px;color:var(--phone-secondary);">빠르고 가벼움 — 간단한 질문·빠른 응답에 최적</span></span></div>
+              <div style="display:flex;gap:5px;padding:4px;border-radius:6px;background:var(--primary-bg);"><span style="width:8px;color:var(--primary);font-weight:700;font-size:8px;">✓</span><span><span style="font-size:8px;font-weight:600;display:block;">Claude Sonnet 4.6</span><span style="font-size:7px;color:var(--phone-secondary);">속도·품질 균형 — 일반 대화 권장 (기본값)</span></span></div>
+              <div style="display:flex;gap:5px;padding:4px;border-radius:6px;"><span style="width:8px;"></span><span><span style="font-size:8px;font-weight:600;display:block;">Claude Opus 4.8</span><span style="font-size:7px;color:var(--phone-secondary);">최고 품질 — 복잡한 꿈 해석에 적합</span></span></div>
+              <div style="display:flex;gap:5px;padding:4px;border-radius:6px;"><span style="width:8px;"></span><span><span style="font-size:8px;font-weight:600;display:block;">Claude Fable 5 <span style="background:#fef3c7;color:#6b4e00;border-radius:999px;padding:0 4px;font-size:6px;font-weight:700;">비용 높음</span></span><span style="font-size:7px;color:var(--phone-secondary);">최상위 모델 — 가장 정교한 추론</span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>2. 모델 바텀시트</strong>relay /api/models 목록 그대로 렌더 · 현재 선택 ✓ · 고비용 모델 배지 · 백드롭/ESC 닫기</div>
+      </div>
+      <div class="arrow">→</div>
+
+      <!-- Step 3: 선택 적용 -->
+      <div class="step">
+        <div class="phone">
+          <div class="phone-status"><span>오후 9:03</span><span>📶 100%</span></div>
+          <div class="phone-header back"><span style="font-size:13px;font-weight:700;color:var(--phone-text);">꿈해몽 💬</span><span style="font-size:9px;font-weight:600;color:var(--primary);background:var(--primary-bg);border-radius:999px;padding:2px 8px;">Opus ▾</span><span style="font-size:12px;color:var(--primary);">히스토리</span></div>
+          <div class="phone-content" style="padding:4px 2px;display:flex;flex-direction:column;gap:4px;">
+            <div style="align-self:flex-end;background:#0090ff;color:#fff;border-radius:16px 16px 4px 16px;padding:5px 8px;font-size:8px;max-width:75%;">절벽에서 떨어지다 날아올랐어요</div>
+            <div style="align-self:flex-start;background:#f0f0f3;color:#1c2024;border-radius:16px 16px 16px 4px;padding:5px 8px;font-size:8px;max-width:85%;">추락이 비상으로 바뀌는 꿈은 위기감이 극복 가능성으로 전환되는 신호로 읽히기도 해요...</div>
+            <div class="sse-events" style="margin-top:auto;">
+              <div>POST /api/chat {model:"opus"}</div>
+              <div>→ relay가 alias 검증·모델 해석</div>
+              <div class="highlight">data: {type:"done", sessionId, modelId:"opus"}</div>
+              <div>→ IDB DreamSession.modelId 저장</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-label"><strong>3. 선택 적용</strong>칩이 Opus로 변경 · 다음 메시지부터 opus로 해몽 · done 이벤트 modelId가 세션에 기록</div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      💡 모델 유효성의 <strong>단일 소스는 relay</strong> — 앱은 alias를 그대로 전달만. 목록 미로드 시 model 미전송 → relay 기본값(sonnet)에 위임. 선택은 <span class="accent">localStorage(gugbab-dream:model)</span>에 유지되어 재방문에도 기억.
+    </div>
+  </section>
+
+  <!-- ========== S4: 음성 입력 ========== -->
+  <section class="slide" data-slide="4">
+    <div class="slide-header">
+      <span class="slide-num">S4 / 9</span>
       <h1>음성 입력 — 마이크로 꿈 말하기</h1>
     </div>
     <h2>🎤 버튼 탭 → Web Speech API 녹음 → 텍스트 자동 채움 → 전송</h2>
@@ -747,9 +829,9 @@
   </section>
 
   <!-- ========== S4: TTS 출력 ========== -->
-  <section class="slide" data-slide="4">
+  <section class="slide" data-slide="5">
     <div class="slide-header">
-      <span class="slide-num">S4 / 8</span>
+      <span class="slide-num">S5 / 9</span>
       <h1>TTS 출력 — AI 해몽을 음성으로 듣기</h1>
     </div>
     <h2>🔊 토글 ON → AI 응답 완료 시 SpeechSynthesis 자동 읽기 → ko-KR 음성</h2>
@@ -848,9 +930,9 @@
   </section>
 
   <!-- ========== S5: 히스토리 회상 ========== -->
-  <section class="slide" data-slide="5">
+  <section class="slide" data-slide="6">
     <div class="slide-header">
-      <span class="slide-num">S5 / 8</span>
+      <span class="slide-num">S6 / 9</span>
       <h1>히스토리 회상 — 과거 대화 다시 보기</h1>
     </div>
     <h2>/history 진입 → 세션 리스트 → 클릭 → /session/[id] 읽기 전용 대화 뷰 (재호출 X)</h2>
@@ -965,9 +1047,9 @@
   </section>
 
   <!-- ========== S6: 히스토리 정리 ========== -->
-  <section class="slide" data-slide="6">
+  <section class="slide" data-slide="7">
     <div class="slide-header">
-      <span class="slide-num">S6 / 8</span>
+      <span class="slide-num">S7 / 9</span>
       <h1>히스토리 정리 — 단건 / 전체 삭제</h1>
     </div>
     <h2>삭제 버튼 → 즉시 제거 · 전체 삭제 → confirm 모달 → clear all</h2>
@@ -1051,9 +1133,9 @@
   </section>
 
   <!-- ========== S7: PWA 설치 + 오프라인 ========== -->
-  <section class="slide" data-slide="7">
+  <section class="slide" data-slide="8">
     <div class="slide-header">
-      <span class="slide-num">S7 / 8</span>
+      <span class="slide-num">S8 / 9</span>
       <h1>PWA 설치 + 오프라인 안내</h1>
     </div>
     <h2>홈 화면에 추가 → 앱처럼 실행 → 오프라인 진입 시 대화 불가 안내 + 히스토리는 OK</h2>
@@ -1134,18 +1216,18 @@
     </div>
 
     <div class="footer-note">
-      💡 SW가 앱 셸을 캐싱해 <strong>오프라인 첫 진입도 가능</strong>. 대화 자체는 Gemini API 호출이 필요하므로 네트워크 필수.
+      💡 SW가 앱 셸을 캐싱해 <strong>오프라인 첫 진입도 가능</strong>. 대화 자체는 relay 경유 Claude 호출이 필요하므로 네트워크 필수.
       <span class="accent">위 오프라인 UI는 v1.1 항목</span> — Phase 3 구현 예정 (현재는 navigator.onLine 체크 + 토스트만).
     </div>
   </section>
 
   <!-- ========== S+: 예외 ========== -->
-  <section class="slide" data-slide="8">
+  <section class="slide" data-slide="9">
     <div class="slide-header">
-      <span class="slide-num">+ / 8</span>
+      <span class="slide-num">+ / 9</span>
       <h1>예외 플로우</h1>
     </div>
-    <h2>API 키 누락 / Gemini 5xx / IndexedDB 차단</h2>
+    <h2>relay 미설정 / relay 5xx / IndexedDB 차단</h2>
     <div class="meta-row">
       <div class="chip"><strong>원칙</strong>실패는 에러 배너 · 재시도 안내</div>
       <div class="chip"><strong>꿈 본문</strong>서버 로그에 절대 미기록</div>
@@ -1162,11 +1244,11 @@
             <div class="sse-events" style="margin:4px 0;">
               <div>POST /api/chat</div>
               <div>→ Zod 검증 OK</div>
-              <div class="highlight">→ GEMINI_API_KEY missing</div>
-              <div>→ 401 Unauthorized</div>
+              <div class="highlight">→ RELAY_URL / RELAY_SECRET missing</div>
+              <div>→ 503 Service Unavailable</div>
             </div>
             <div class="error-banner">
-              설정 오류로 대화가 불가해요. 서버 설정을 확인해주세요.
+              릴레이 서버가 설정되지 않았어요.
             </div>
             <!-- input bar disabled -->
             <div style="display:flex;align-items:center;gap:4px;background:#f0f0f3;border-radius:20px;padding:6px 8px;opacity:0.4;margin-top:auto;">
@@ -1176,11 +1258,11 @@
             </div>
           </div>
         </div>
-        <div class="step-label"><strong>예외 1. API 키 누락</strong>401 → 에러 배너 · 입력 비활성 · 스택트레이스 노출 없음</div>
+        <div class="step-label"><strong>예외 1. relay 미설정</strong>RELAY_URL·RELAY_SECRET 누락 → 503 → 에러 배너 · 입력 비활성 · 스택트레이스 노출 없음</div>
       </div>
       <div class="arrow">→</div>
 
-      <!-- 예외 2: Gemini 5xx -->
+      <!-- 예외 2: relay 5xx -->
       <div class="step">
         <div class="phone">
           <div class="phone-status"><span>오후 6:42</span><span>📶 100%</span></div>
@@ -1190,7 +1272,7 @@
             <!-- partial ai bubble with error -->
             <div style="align-self:flex-start;background:#f0f0f3;color:#1c2024;border-radius:16px 16px 16px 4px;padding:5px 8px;font-size:8px;max-width:80%;">사슴은 행운의 상징으로...</div>
             <div class="sse-events" style="margin:2px 0;">
-              <div class="highlight">→ Gemini 503 Service Unavailable</div>
+              <div class="highlight">→ relay 503 Service Unavailable</div>
               <div class="highlight">data: {type:"error",message:"..."}</div>
             </div>
             <div class="error-banner">
@@ -1204,7 +1286,7 @@
             </div>
           </div>
         </div>
-        <div class="step-label"><strong>예외 2. Gemini 5xx</strong>스트리밍 중 에러 → error SSE 이벤트 → 에러 배너 · 재입력 가능</div>
+        <div class="step-label"><strong>예외 2. relay 5xx</strong>relay 오류·연결 실패 → error SSE 이벤트로 변환 → 에러 배너 · 재입력 가능</div>
       </div>
       <div class="arrow">→</div>
 
