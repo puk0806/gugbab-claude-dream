@@ -23,6 +23,9 @@ export interface DreamEntry {
     schemaVersion: 1;
 }
 
+// relay API 계약 타입 — 단일 소스는 @gugbab/relay-types (OpenAPI 생성)
+export type { ModelAlias, ModelInfo, ModelsResponse } from "@gugbab/relay-types";
+
 export type ChatSseEvent =
     | { type: "chunk"; text: string }
     | { type: "done"; sessionId: string; modelId: string }

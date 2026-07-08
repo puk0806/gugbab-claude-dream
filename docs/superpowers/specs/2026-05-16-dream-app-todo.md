@@ -1,7 +1,7 @@
 # 꿈해몽 PWA — Todo / 진행 상태
 
 - **연결 문서**: [2026-05-16-dream-app-design.md](./2026-05-16-dream-app-design.md)
-- **최종 갱신**: 2026-05-21
+- **최종 갱신**: 2026-07-08
 
 > 이 파일은 *현재 무엇이 끝났고 다음에 무엇을 해야 하는지* 한눈에 보이게 만드는 진행판입니다.
 > 매 작업 끝날 때마다 항목 옆 체크박스를 갱신합니다.
@@ -90,9 +90,34 @@
 
 ---
 
+## 3.5단계 — LLM relay 전환 (완료 · 2026-07-08)
+
+- [x] `/api/chat`을 gugbab-claude-relay 프록시 경유로 전환 (Gemini 직접 호출 제거, Claude opus-4-8 deep / haiku-4-5 fast)
+- [x] `@gugbab/utils` 1.0.1 → 1.1.0 · 로컬 `sseLine` 제거, `toSSELine` 사용
+- [x] relay `done` 이벤트에 `sessionId`·`modelId` 주입 (`injectDoneFields`) — 클라이언트 `ChatSseEvent` 계약 유지
+- [x] fetch 실패 → SSE error 스트림 변환 + `SSE_HEADERS` 상수화
+- [x] vitest 12건 통과 + 로컬 curl SSE 실검증 (chunk 스트리밍 → done 주입 확인)
+- [ ] Vercel 환경변수 교체: `GEMINI_API_KEY` 제거 → `RELAY_URL`·`RELAY_SECRET` 등록 *(사용자 액션)*
+- [ ] 노출된 RELAY_SECRET 재발급 (exports/ 파일에 평문 커밋됨) *(사용자 액션)*
+- [ ] relay 전환 브랜치 커밋 + PR + 머지 *(사용자 액션 — 시각 회귀 accept-baseline 라벨 필요)*
+
+---
+
+## 3.6단계 — 모델 선택 (완료 · 2026-07-08)
+
+- [x] `/api/models` — relay `GET /api/models` 프록시 신설 (5분 캐시) · 모델 4종: haiku·sonnet·opus·fable (기본 sonnet)
+- [x] `ModelSheet` 바텀시트 + 홈 헤더 모델 칩 (health 앱 패턴 미러링) · 선택은 `localStorage(gugbab-dream:model)` 유지
+- [x] "깊은/빠른 해몽" 토글 제거 → `/api/chat`이 `model` alias 수용 (모델 유효성 단일 소스 = relay, haiku만 캐주얼 프롬프트)
+- [x] OpenAI 직접 호출 잔재 정리 — `lib/llm.ts` 삭제 · `openai` 의존성 제거
+- [x] `@gugbab/relay-types` 도입 — relay API 계약 타입 단일 소스 (OpenAPI 생성, health 앱과 공유). `ModelInfo`/`ModelsResponse` 재수출, chat route `ChatRequest`·`SSEError` 적용
+- [x] vitest 28건 통과 (models 프록시 4건 + chat alias 계약 7건 + 컴포넌트 렌더) · 로컬 curl 실검증 (`modelId:"haiku"` done 주입 확인)
+- [x] scenarios.html 전면 갱신 (모델 선택 S3 슬라이드 신설 + Gemini→relay/Claude 전면 교체) + dream-app.html 반영
+
+---
+
 ## 4단계 — 배포 (예정)
 
-- [ ] Vercel 프로덕션 배포
+- [ ] Vercel 프로덕션 배포 (relay 경유 채팅 동작 검증 포함)
 - [ ] OG 이미지, SEO 메타
 - [ ] 첫 사용자 테스트 (지인 5명)
 - [ ] 피드백 수렴 → v1.1 계획
@@ -120,3 +145,5 @@
 | 2026-05-25 | result page SSE fix: React 19 strict mode double-invoke 와 startedRef 충돌로 setState 갱신이 영원히 막히던 버그 해결 (AbortController 도입 + startedRef 제거 + try/catch 보강) |
 | 2026-05-26 | **LLM 공급자 전환**: Anthropic Claude Sonnet 4.6 → Google Gemini 2.5 Flash. 결제 부담 0 (무료 한도 일 1,500 req). 자산 24개·prompts/_compiled·system prompt 조립 로직 **모두 그대로 유지** — 변경된 건 LLM 호출 레이어 4개 파일(`lib/claude.ts`→`lib/llm.ts`, `lib/safety.ts`, `app/api/interpret/route.ts`, `.env.example`) + 패키지(`@anthropic-ai/sdk` → `@google/genai`). JSON 출력은 Gemini `responseSchema` 강제. 차별점(.claude 자산 system instruction 임베드)은 100% 유지 |
 | 2026-05-29 | **1차 동작 검증 완료** — dev 서버에서 3톤(casual/reflective/traditional) 모두 SSE 스트리밍 정상 (각 5/16/8 chunks, 1.3K~3.7K bytes). 자산 효과 확인: reflective 톤이 "한국 전통 + 융 + 프로이트 3관점 + 자기성찰 질문 3개" 의도 형식 그대로 응답. safety classifier 일반 꿈은 JSON 정상(`null`, conf 0.95), 위기 신호는 보수적 분기로 fallback (UX상 안전 카드 동일하게 표시). **추가 fix**: TIMEOUT 3s→10s, classifier maxOutputTokens 200→800, llm 1024→2048, 양쪽에 Gemini safetySettings BLOCK_ONLY_HIGH, JSON 자연어 prefix fallback parser. 디버깅 console.warn 제거. typecheck/check/build 모두 PASS |
+| 2026-07-08 | **LLM relay 전환 완료** (3.5단계 신설): Gemini 직접 호출 → gugbab-claude-relay 프록시 경유 Claude. `@gugbab/utils` 1.1.0 업 + `toSSELine` 교체, relay done 이벤트에 sessionId·modelId 주입(`injectDoneFields`), fetch 실패 SSE error 변환. vitest + 로컬 curl 실검증 PASS. **환경 주의**: 회사망(lfcorp) TLS 인터셉션으로 로컬 dev는 `NODE_EXTRA_CA_CERTS=~/lfcorp-ca.pem pnpm dev` 필요 (Vercel은 무관). 잔여 사용자 액션: Vercel 환경변수 교체(GEMINI_API_KEY→RELAY_URL·RELAY_SECRET), 노출 시크릿 재발급, 커밋+PR |
+| 2026-07-08 | **모델 선택 완료** (3.6단계 신설): 깊은/빠른 토글 → relay 모델 목록(4종, 기본 sonnet) 기반 ModelSheet 바텀시트 + 헤더 모델 칩 (health 앱 패턴 미러링). `/api/models` 프록시 신설, `/api/chat` model alias 수용, `lib/llm.ts`·`openai` 의존성 제거. vitest 28건 + curl 실검증 PASS. scenarios.html 전면 갱신 (S3 모델 선택 슬라이드 신설, 9슬라이드 재구성, Gemini 언급 전량 relay/Claude로 교체). **주의**: 홈 헤더 UI 변경으로 시각 회귀 베이스라인 갱신 필요 (PR에 accept-baseline 라벨) |

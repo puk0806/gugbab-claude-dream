@@ -1,0 +1,109 @@
+.sheetBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--gugbab-color-overlay, rgba(0, 0, 0, 0.4));
+  display: flex;
+  align-items: flex-end;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--gugbab-color-bg-surface, #ffffff);
+  border-radius: 16px 16px 0 0;
+  padding: 16px 12px calc(16px + env(safe-area-inset-bottom));
+  animation: sheetUp 0.2s ease-out;
+}
+
+@keyframes sheetUp {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation: none;
+  }
+}
+
+.sheetTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 8px 10px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--gugbab-color-fg-primary, #1c2024);
+}
+
+.sheetTitle small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gugbab-color-fg-muted, #8b8d98);
+}
+
+.modelRow,
+.modelRowSelected {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.modelRowSelected {
+  background: rgba(0, 144, 255, 0.1);
+}
+
+.modelCheck {
+  width: 16px;
+  flex-shrink: 0;
+  padding-top: 1px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--gugbab-color-accent-base, #0090ff);
+}
+
+.modelInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modelName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gugbab-color-fg-primary, #1c2024);
+}
+
+.modelCostBadge {
+  padding: 0 7px;
+  border-radius: 100px;
+  background: var(--gugbab-color-warning-subtle, #fef3c7);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #6b4e00;
+}
+
+.modelDesc {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--gugbab-color-fg-secondary, #60646c);
+}

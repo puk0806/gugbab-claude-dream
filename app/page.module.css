@@ -33,6 +33,27 @@
   text-decoration: none;
 }
 
+.modelChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 100px;
+  background: rgba(0, 144, 255, 0.12);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gugbab-color-accent-base, #0090ff);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.modelChip:disabled {
+  background: var(--gugbab-color-bg-inset, #f0f0f3);
+  color: var(--gugbab-color-fg-disabled, #b9bbc6);
+  cursor: default;
+}
+
 .newSessionBtn {
   margin: var(--gugbab-space-2, 8px) auto;
   padding: var(--gugbab-space-2, 8px) var(--gugbab-space-4, 16px);

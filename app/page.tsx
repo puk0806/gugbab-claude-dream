@@ -1,5 +1,6 @@
 "use client";
 
+import { capitalize } from "@gugbab/utils";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ulid } from "ulid";
@@ -7,20 +8,34 @@ import { ChatInput } from "@/components/ChatInput";
 import { ChatView } from "@/components/ChatView";
 import { HistoryList } from "@/components/HistoryList";
 import { InstallButton } from "@/components/install/InstallButton";
+import ModelSheet from "@/components/ModelSheet";
 import { listSessionsDesc, saveSession } from "@/lib/db";
 import { useSpeak } from "@/lib/speech";
-import type { ChatMessage, ChatSseEvent, DreamSession } from "@/lib/types";
+import type { ChatMessage, ChatSseEvent, DreamSession, ModelInfo, ModelsResponse } from "@/lib/types";
 import styles from "./page.module.css";
+
+const MODEL_STORAGE_KEY = "gugbab-dream:model";
+const FALLBACK_MODEL = "sonnet";
+
+function loadStoredModel(): string {
+    if (typeof window === "undefined") return FALLBACK_MODEL;
+    try {
+        return window.localStorage.getItem(MODEL_STORAGE_KEY) ?? FALLBACK_MODEL;
+    } catch {
+        return FALLBACK_MODEL;
+    }
+}
 
 async function streamChat(
     sessionId: string,
     messages: Array<{ role: string; content: string }>,
     onChunk: (text: string) => void,
+    model?: string,
 ): Promise<string> {
     const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ sessionId, messages }),
+        body: JSON.stringify({ sessionId, messages, ...(model ? { model } : {}) }),
     });
     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
 
@@ -70,6 +85,9 @@ export default function HomePage() {
     const [streamingText, setStreamingText] = useState("");
     const [isStreaming, setIsStreaming] = useState(false);
     const [ttsEnabled, setTtsEnabled] = useState(false);
+    const [models, setModels] = useState<ModelInfo[] | null>(null);
+    const [model, setModel] = useState<string>(loadStoredModel);
+    const [sheetOpen, setSheetOpen] = useState(false);
 
     // SSR hydration mismatch 방지 — 마운트 후 localStorage에서 읽음
     useEffect(() => {
@@ -83,6 +101,37 @@ export default function HomePage() {
             .then(setRecentSessions)
             .catch(() => setRecentSessions([]));
     }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function loadModels() {
+            try {
+                const res = await fetch("/api/models");
+                if (!res.ok) return;
+                const data = (await res.json()) as ModelsResponse;
+                if (cancelled) return;
+                setModels(data.models);
+                // 저장된 alias가 폐기됐으면 relay 기본값으로 폴백
+                setModel((prev) => (data.models.some((m) => m.alias === prev) ? prev : data.default));
+            } catch {
+                // 미로드 시 모델 미전달 — relay 기본값에 위임
+            }
+        }
+        loadModels();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const handleSelectModel = (alias: string) => {
+        setModel(alias);
+        try {
+            localStorage.setItem(MODEL_STORAGE_KEY, alias);
+        } catch {
+            // localStorage 불가 환경 — 세션 내 상태로만 유지
+        }
+        setSheetOpen(false);
+    };
 
     const sendMessage = useCallback(
         async (text: string) => {
@@ -118,6 +167,8 @@ export default function HomePage() {
                         accumulated += chunk;
                         setStreamingText(accumulated);
                     },
+                    // 목록으로 검증된 경우에만 model 전달 — 미로드 시 relay 기본값에 위임 (폐기된 alias 전송 방지)
+                    models ? model : undefined,
                 );
 
                 if (accumulated) {
@@ -147,7 +198,7 @@ export default function HomePage() {
                 setStreamingText("");
             }
         },
-        [session, ttsEnabled],
+        [session, ttsEnabled, models, model, speak, ttsSupported],
     );
 
     const handleNewSession = () => {
@@ -163,6 +214,15 @@ export default function HomePage() {
             <header className={styles.header}>
                 <h1 className={styles.title}>꿈해몽 💬</h1>
                 <nav className={styles.headerActions}>
+                    <button
+                        type="button"
+                        className={styles.modelChip}
+                        onClick={() => setSheetOpen(true)}
+                        disabled={isStreaming || !models}
+                        aria-haspopup="dialog"
+                    >
+                        {models ? capitalize(model) : "모델"} <span aria-hidden>▾</span>
+                    </button>
                     <InstallButton />
                     <Link href="/history" className={styles.historyLink}>
                         히스토리
@@ -197,6 +257,15 @@ export default function HomePage() {
                     })
                 }
             />
+
+            {sheetOpen && models && (
+                <ModelSheet
+                    models={models}
+                    selected={model}
+                    onSelect={handleSelectModel}
+                    onClose={() => setSheetOpen(false)}
+                />
+            )}
 
             {recentSessions.length > 0 && !session && (
                 <section className={styles.recent} aria-labelledby="recent-title">
