@@ -18,5 +18,8 @@ lfcorp 루트 CA가 macOS 키체인에는 있어서 curl은 성공하지만, Nod
 2. Node 프로세스에 주입: `NODE_EXTRA_CA_CERTS=~/lfcorp-ca.pem pnpm dev`
 3. pnpm 다운로드가 행업하면 캐시 활용: `pnpm install --prefer-offline`
 4. `NODE_TLS_REJECT_UNAUTHORIZED=0`은 사용 금지 (검증 전체 비활성화)
+5. 대안: gugbab-claude-relay를 로컬(HTTP)로 띄우고 `RELAY_URL=http://localhost:3000` 지정 — TLS 자체를 우회. 단 relay가 3000 선점 시 앱 dev 서버는 3001에 뜨므로 포트 주의
 
 gugbab-workspace의 모든 relay 연동 앱(dream, health 등) 로컬 dev·curl 테스트에 공통 적용된다.
+health 프로젝트도 2026-07-06 같은 이슈를 겪고 동일하게 해결했다 (health repo `memory/env-corp-tls-interception.md`에 기록).
+Vercel 배포 환경에는 이 문제가 없다 — 로컬 개발 전용.
