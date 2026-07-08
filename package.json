@@ -25,11 +25,10 @@
     "test:visual:report": "playwright show-report"
   },
   "dependencies": {
-    "@google/genai": "^2.6.0",
     "@gugbab/hooks": "1.0.1",
     "@gugbab/styled-radix": "1.0.2",
     "@gugbab/tokens": "1.0.0",
-    "@gugbab/utils": "1.0.1",
+    "@gugbab/utils": "1.1.0",
     "@serwist/next": "^9.5.11",
     "idb": "^8.0.3",
     "next": "16.2.6",
@@ -41,13 +40,16 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@gugbab/biome-config": "1.0.1",
+    "@gugbab/relay-types": "latest",
     "@playwright/test": "^1.60.0",
+    "@rolldown/binding-darwin-arm64": "^1.1.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "serwist": "^9.5.11",
     "sharp": "^0.34.5",
     "tsx": "^4.22.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   }
 }
