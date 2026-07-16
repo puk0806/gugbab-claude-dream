@@ -23,6 +23,12 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
     themeColor: "#4f46e5",
+    width: "device-width",
+    initialScale: 1,
+    // 앱형 PWA — 핀치/더블탭 확대로 화면이 흔들리는 것 방지 (iOS 입력 포커스 자동 확대 차단 겸용)
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
 };
 
 export default function RootLayout({

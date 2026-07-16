@@ -15,4 +15,6 @@ body {
 body {
   background: var(--gugbab-color-bg-app);
   color: var(--gugbab-color-fg-primary);
+  /* 더블탭 확대 차단 — 탭 반응도 빨라짐 */
+  touch-action: manipulation;
 }
