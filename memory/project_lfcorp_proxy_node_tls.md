@@ -9,7 +9,7 @@ metadata:
 
 이 개발 머신(회사망)은 lfcorp 프록시(`CN=www.lfcorp.com`)가 모든 외부 TLS를 가로챈다.
 lfcorp 루트 CA가 macOS 키체인에는 있어서 curl은 성공하지만, Node(fetch/undici, pnpm 다운로드)는
-자체 CA 번들만 신뢰해 `SELF_SIGNED_CERT_IN_CHAIN`으로 실패하거나 무한 대기한다. (확인일: 2026-07-08)
+자체 CA 번들만 신뢰해 `SELF_SIGNED_CERT_IN_CHAIN`으로 실패하거나 무한 대기한다. (확인일: 2026-07-08, dream 로컬 relay 검증에서 2026-07-16 재확인)
 
 **Why:** dev 서버의 relay(fetch) 호출, pnpm install 다운로드가 이 문제로 조용히 실패/행업했음. 증상만 보면 relay 장애나 네트워크 문제로 오인하기 쉽다.
 
