@@ -6,10 +6,9 @@ import { useCallback, useEffect, useState } from "react";
 import { ulid } from "ulid";
 import { ChatInput } from "@/components/ChatInput";
 import { ChatView } from "@/components/ChatView";
-import { HistoryList } from "@/components/HistoryList";
 import { InstallButton } from "@/components/install/InstallButton";
 import ModelSheet from "@/components/ModelSheet";
-import { listSessionsDesc, saveSession } from "@/lib/db";
+import { saveSession } from "@/lib/db";
 import { useSpeak } from "@/lib/speech";
 import type { ChatMessage, ChatSseEvent, DreamSession, ModelInfo, ModelsResponse } from "@/lib/types";
 import styles from "./page.module.css";
@@ -81,7 +80,6 @@ async function streamChat(
 
 export default function HomePage() {
     const [session, setSession] = useState<DreamSession | null>(null);
-    const [recentSessions, setRecentSessions] = useState<DreamSession[]>([]);
     const [streamingText, setStreamingText] = useState("");
     const [isStreaming, setIsStreaming] = useState(false);
     const [ttsEnabled, setTtsEnabled] = useState(false);
@@ -95,12 +93,6 @@ export default function HomePage() {
     }, []);
     const [errorMsg, setErrorMsg] = useState("");
     const { speak, supported: ttsSupported } = useSpeak();
-
-    useEffect(() => {
-        listSessionsDesc(3)
-            .then(setRecentSessions)
-            .catch(() => setRecentSessions([]));
-    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -202,9 +194,6 @@ export default function HomePage() {
     );
 
     const handleNewSession = () => {
-        if (session) {
-            setRecentSessions((prev) => [session, ...prev].slice(0, 3));
-        }
         setSession(null);
         setErrorMsg("");
     };
@@ -265,15 +254,6 @@ export default function HomePage() {
                     onSelect={handleSelectModel}
                     onClose={() => setSheetOpen(false)}
                 />
-            )}
-
-            {recentSessions.length > 0 && !session && (
-                <section className={styles.recent} aria-labelledby="recent-title">
-                    <h2 id="recent-title" className={styles.recentTitle}>
-                        최근 대화
-                    </h2>
-                    <HistoryList sessions={recentSessions} />
-                </section>
             )}
         </main>
     );

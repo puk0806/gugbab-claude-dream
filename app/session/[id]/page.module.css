@@ -11,6 +11,8 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--gugbab-space-4, 16px);
+  /* iOS standalone PWA — 노치/다이나믹 아일랜드 아래로 헤더 내리기 */
+  padding-top: calc(var(--gugbab-space-4, 16px) + env(safe-area-inset-top));
   border-bottom: 1px solid var(--gugbab-color-border-base, #cdced6);
 }
 
@@ -31,6 +33,7 @@
   font-size: 12px;
   color: var(--gugbab-color-fg-muted, #80838d);
   padding: var(--gugbab-space-2, 8px);
+  padding-bottom: calc(var(--gugbab-space-2, 8px) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--gugbab-color-border-base, #cdced6);
 }
 
