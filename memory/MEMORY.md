@@ -7,3 +7,4 @@
 - [API 키 노출 시 폐기 안내](feedback_api_key_handling.md) — 사용자가 채팅에 secret 붙여넣으면 즉시 폐기+재발급 안내, 노출된 키는 어떤 도구로도 사용·저장·echo 금지
 - [시각 회귀 베이스라인 macOS PNG 커밋 금지](feedback_visual_regression.md) — __screenshots__/ 는 .gitignore, CI만 git add -f로 커밋. accept-baseline 라벨로 Ubuntu 기준 재생성
 - [lfcorp 프록시 Node TLS 이슈](project_lfcorp_proxy_node_tls.md) — 회사망에서 Node fetch/pnpm SELF_SIGNED_CERT_IN_CHAIN 실패, NODE_EXTRA_CA_CERTS로 해결
+- [Cursor git lock 경합](project_cursor_git_lock_race.md) — Cursor gitWorker가 index.lock을 순간 점유, git 쓰기 명령은 재시도 루프로 감싼다
