@@ -15,6 +15,7 @@ interface ChatViewProps {
 export function ChatView({ messages, streamingText, isStreaming }: ChatViewProps) {
     const bottomRef = useRef<HTMLDivElement>(null);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 메시지 추가·스트리밍 갱신 시 하단 스크롤을 트리거하기 위한 의도적 의존성
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages.length, streamingText]);
