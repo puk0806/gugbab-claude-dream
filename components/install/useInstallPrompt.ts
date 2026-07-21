@@ -18,8 +18,10 @@ export interface UseInstallPromptResult {
 
 export function useInstallPrompt(): UseInstallPromptResult {
     const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-    const [installed, setInstalled] = useState<boolean>(() => detectStandalone());
-    const [iosFallback, setIosFallback] = useState<boolean>(() => detectIOSSafari());
+    // 초기값은 항상 false — 첫 클라이언트 렌더가 SSR(null)과 일치해야 hydration 오류가 없다.
+    // 실제 감지값은 아래 mount effect에서 반영된다.
+    const [installed, setInstalled] = useState(false);
+    const [iosFallback, setIosFallback] = useState(false);
 
     useEffect(() => {
         if (typeof window === "undefined") return;

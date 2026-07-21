@@ -15,7 +15,8 @@ const MessageSchema = z.object({
 
 const ChatRequestSchema = z.object({
     messages: z.array(MessageSchema).min(1).max(50),
-    sessionId: z.string().min(1),
+    // ulid 26자 기준 여유 상한 — done 이벤트에 반사되므로 과대 값 차단
+    sessionId: z.string().min(1).max(64),
     // 형식만 검증하고 그대로 relay에 전달 — 모델 유효성의 단일 소스는 relay
     model: z.string().min(1).max(64).optional(),
 });

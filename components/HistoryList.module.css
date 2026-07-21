@@ -13,6 +13,8 @@
 
 .link {
   flex: 1;
+  /* nowrap preview가 flex 컨테이너를 밀어 가로 스크롤 생기는 것 방지 */
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: var(--gugbab-space-1, 4px);

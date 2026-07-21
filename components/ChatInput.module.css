@@ -27,6 +27,8 @@
   align-items: flex-end;
   gap: var(--gugbab-space-2, 8px);
   padding: var(--gugbab-space-3, 12px);
+  /* iOS standalone PWA — 홈 인디케이터에 입력바 가림 방지 */
+  padding-bottom: calc(var(--gugbab-space-3, 12px) + env(safe-area-inset-bottom));
   border-top: 1px solid var(--gugbab-color-border-base, #cdced6);
   background: var(--gugbab-color-bg-surface, #f9f9fb);
   width: 100%;

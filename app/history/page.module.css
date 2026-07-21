@@ -2,6 +2,9 @@
   max-width: 720px;
   margin: 0 auto;
   padding: var(--gugbab-space-6, 24px);
+  /* iOS standalone PWA — 노치/홈 인디케이터 회피 */
+  padding-top: calc(var(--gugbab-space-6, 24px) + env(safe-area-inset-top));
+  padding-bottom: calc(var(--gugbab-space-6, 24px) + env(safe-area-inset-bottom));
   min-height: 90vh;
 }
 

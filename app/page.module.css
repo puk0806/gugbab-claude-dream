@@ -10,7 +10,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--gugbab-space-4, 16px) var(--gugbab-space-4, 16px) var(--gugbab-space-3, 12px);
+  /* iOS standalone PWA — 노치/다이나믹 아일랜드 아래로 헤더 내리기 */
+  padding: calc(var(--gugbab-space-4, 16px) + env(safe-area-inset-top)) var(--gugbab-space-4, 16px)
+    var(--gugbab-space-3, 12px);
   border-bottom: 1px solid var(--gugbab-color-border-base, #cdced6);
 }
 
@@ -77,17 +79,4 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-}
-
-.recent {
-  padding: var(--gugbab-space-3, 12px) var(--gugbab-space-3, 12px) 0;
-}
-
-.recentTitle {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--gugbab-color-fg-muted, #80838d);
-  margin: 0 0 var(--gugbab-space-2, 8px) 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
