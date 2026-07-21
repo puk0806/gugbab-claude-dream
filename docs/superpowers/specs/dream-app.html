@@ -379,6 +379,7 @@
         <br><small style="color:var(--text-faint);font-size:13px;">※ 줌 차단(2026-07-15): 핀치/더블탭 확대로 UI 깨지는 문제 방지 — viewport maximumScale=1·userScalable=false·viewportFit=cover + body touch-action: manipulation (gugbab-health와 동일 패턴)</small>
         <br><small style="color:var(--text-faint);font-size:13px;">※ 해몽 톤 전환(2026-07-16): deep 프롬프트를 관점(전통·심리학·과학) 나열식 → 꿈해몽가와 마주 앉아 이야기하는 대화체로 전환. 관점 표찰·소제목·불릿 금지, 지식은 흐름에 녹임. 안전 규칙(단정 예언·진단 금지) 유지</small>
         <br><small style="color:var(--text-faint);font-size:13px;">※ 모바일 UI 정리(2026-07-20): 헤더·입력바·히스토리에 safe-area inset 적용(노치/홈 인디케이터 가림 해소), 홈 하단 "최근 대화" 섹션 제거(가로 스크롤 원인) — 대화 목록은 우측 상단 히스토리 버튼으로 일원화(개별·전체 삭제 지원)</small>
+        <br><small style="color:var(--text-faint);font-size:13px;">※ 리팩토링(2026-07-20): page.tsx(260줄)를 lib/chat-stream(SSE 파싱)·useModelSelection·useChatSession으로 분리(조립 전용 ~100줄), 테스트 30→49개. iOS Safari에서 InstallButton hydration mismatch 버그 수정(감지값 mount 이후 반영). Biome 오류·경고 0</small>
       </div>
     </section>
 
