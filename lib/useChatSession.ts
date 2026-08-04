@@ -1,6 +1,7 @@
 // 클라이언트 전용 — SSR에서 호출하지 않는다.
 import { useCallback, useState } from "react";
 import { ulid } from "ulid";
+import { toOutgoingMessages } from "./chat-history";
 import { streamChat } from "./chat-stream";
 import { saveSession } from "./db";
 import type { ChatMessage, DreamSession } from "./types";
@@ -54,9 +55,10 @@ export function useChatSession({ model, onAssistantComplete }: UseChatSessionOpt
             try {
                 await saveSession(withUser);
 
+                // 긴 해몽 답변이 쌓여도 API 한도(개수·글자수)를 넘지 않도록 압축해 전송
                 const modelId = await streamChat(
                     withUser.id,
-                    withUser.messages.map((m) => ({ role: m.role, content: m.content })),
+                    toOutgoingMessages(withUser.messages.map((m) => ({ role: m.role, content: m.content }))),
                     (chunk) => {
                         accumulated += chunk;
                         setStreamingText(accumulated);

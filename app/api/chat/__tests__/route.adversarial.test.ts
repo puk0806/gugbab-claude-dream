@@ -111,7 +111,7 @@ describe("POST /api/chat — 악성/비정형 입력 방어", () => {
         expect(res.status).toBe(200);
         const sent = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string) as Record<string, unknown>;
         // zod 파싱된 필드만 전달 — 주입 키는 미포함, 전역 프로토타입 미오염
-        expect(Object.keys(sent).sort()).toEqual(["app", "messages", "systemPrompt"]);
+        expect(Object.keys(sent).sort()).toEqual(["app", "messages", "systemPrompt", "wantSummary"]);
         expect(({} as Record<string, unknown>).admin).toBeUndefined();
     });
 

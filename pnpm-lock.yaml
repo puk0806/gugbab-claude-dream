@@ -49,8 +49,8 @@ importers:
         specifier: 1.0.1
         version: 1.0.1(@biomejs/biome@2.4.15)
       '@gugbab/relay-types':
-        specifier: latest
-        version: 1.0.0-202607081514
+        specifier: 1.0.0-202608031427
+        version: 1.0.0-202608031427
       '@playwright/test':
         specifier: ^1.60.0
         version: 1.60.0
@@ -344,8 +344,8 @@ packages:
     peerDependencies:
       react: '>=18'
 
-  '@gugbab/relay-types@1.0.0-202607081514':
-    resolution: {integrity: sha512-W6WtslghzJZUZ3Wij02v6+Prd5WtsybR9VDwjGJvSZoDfpcMsLoz1sKNFzdExBdBoUkGRQYVPBaREAq8pv2HRQ==}
+  '@gugbab/relay-types@1.0.0-202608031427':
+    resolution: {integrity: sha512-mYkiyxhteafHbPl6/EimreEJDytDtuJy9Nwi+Qls2irpjtEriTrmKsbcKACwaavxzW7NXxrPWaopuUHMaZulwA==}
     engines: {node: '>=18.0.0'}
 
   '@gugbab/styled-radix@1.0.2':
@@ -1438,7 +1438,7 @@ snapshots:
       '@gugbab/utils': 1.0.1
       react: 19.2.4
 
-  '@gugbab/relay-types@1.0.0-202607081514': {}
+  '@gugbab/relay-types@1.0.0-202608031427': {}
 
   '@gugbab/styled-radix@1.0.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:

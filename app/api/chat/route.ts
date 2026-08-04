@@ -2,6 +2,7 @@ import type { ChatRequest, SSEError } from "@gugbab/relay-types";
 import { toSSELine } from "@gugbab/utils";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { MESSAGE_LIMITS } from "@/lib/chat-history";
 import { getChatSystemPrompt } from "@/lib/prompts/chat";
 import type { ChatSseEvent } from "@/lib/types";
 
@@ -10,11 +11,11 @@ export const maxDuration = 60;
 
 const MessageSchema = z.object({
     role: z.enum(["user", "model"]),
-    content: z.string().min(1).max(4000),
+    content: z.string().min(1).max(MESSAGE_LIMITS.maxContentLength),
 });
 
 const ChatRequestSchema = z.object({
-    messages: z.array(MessageSchema).min(1).max(50),
+    messages: z.array(MessageSchema).min(1).max(MESSAGE_LIMITS.maxCount),
     // ulid 26자 기준 여유 상한 — done 이벤트에 반사되므로 과대 값 차단
     sessionId: z.string().min(1).max(64),
     // 형식만 검증하고 그대로 relay에 전달 — 모델 유효성의 단일 소스는 relay
@@ -125,6 +126,8 @@ export async function POST(req: NextRequest): Promise<Response> {
                 app: "dream",
                 systemPrompt,
                 messages,
+                // 답변 요약 미사용 — 기존 done 계약 유지
+                wantSummary: false,
                 ...(parsed.model ? { model: parsed.model } : {}),
             } satisfies RelayChatBody),
             signal: req.signal,

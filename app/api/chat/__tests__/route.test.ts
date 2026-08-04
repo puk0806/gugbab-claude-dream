@@ -81,6 +81,7 @@ describe("POST /api/chat (dream relay proxy)", () => {
         const sentBody = JSON.parse(options.body as string);
         expect(sentBody.app).toBe("dream");
         expect(sentBody.model).toBe("opus");
+        expect(sentBody.wantSummary).toBe(false);
         expect((options.headers as Record<string, string>)["X-Relay-Secret"]).toBe("test-secret");
         expect(mockGetChatSystemPrompt).toHaveBeenCalledWith("deep");
     });
