@@ -13,9 +13,17 @@ export interface OutgoingMessage {
     content: string;
 }
 
+/** 압축 입력 형태 — model 메시지는 relay가 생성한 요약(best-effort)을 가질 수 있다 */
+export interface HistoryMessage extends OutgoingMessage {
+    summary?: string;
+}
+
 // 전송 이력 상한 — API 상한(50)보다 낮게 잡아 여유를 둔다
 const MAX_OUTGOING_COUNT = 30;
+// 최근 N개는 원문 유지 — 직전 턴의 뉘앙스가 답변 품질에 직결되므로 요약 대체 대상에서 제외
+const RECENT_VERBATIM_COUNT = 4;
 const TRUNCATION_MARK = "\n…(이하 생략)";
+const SUMMARY_PREFIX = "[이전 답변 요약] ";
 
 function clampContent(content: string): string {
     if (content.length <= MESSAGE_LIMITS.maxContentLength) return content;
@@ -27,10 +35,19 @@ function clampContent(content: string): string {
  *
  * - 최근 {@link MAX_OUTGOING_COUNT}개만 남기고, 각 메시지는 글자수 상한 내로 잘라낸다
  * - relay 규약(첫 메시지는 user)을 위해 잘라낸 뒤 선두의 model 메시지는 제거한다
+ * - 최근 {@link RECENT_VERBATIM_COUNT}개보다 오래된 model 메시지는 요약이 있으면 요약으로
+ *   대체한다 (요약은 best-effort — 없으면 기존처럼 원문 절삭)
+ * - 반환값은 {@link OutgoingMessage}만 포함한다 — summary 필드는 전송하지 않는다
  */
-export function toOutgoingMessages(messages: readonly OutgoingMessage[]): OutgoingMessage[] {
+export function toOutgoingMessages(messages: readonly HistoryMessage[]): OutgoingMessage[] {
     const sliced = messages.slice(-MAX_OUTGOING_COUNT);
     const firstUserIdx = sliced.findIndex((m) => m.role === "user");
     const window = firstUserIdx > 0 ? sliced.slice(firstUserIdx) : sliced;
-    return window.map((m) => ({ role: m.role, content: clampContent(m.content) }));
+    return window.map((m, i) => {
+        const isRecent = i >= window.length - RECENT_VERBATIM_COUNT;
+        if (!isRecent && m.role === "model" && m.summary) {
+            return { role: m.role, content: clampContent(SUMMARY_PREFIX + m.summary) };
+        }
+        return { role: m.role, content: clampContent(m.content) };
+    });
 }

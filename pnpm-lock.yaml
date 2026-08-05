@@ -18,8 +18,8 @@ importers:
         specifier: 1.0.0
         version: 1.0.0
       '@gugbab/utils':
-        specifier: 1.1.0
-        version: 1.1.0
+        specifier: 1.2.0
+        version: 1.2.0
       '@serwist/next':
         specifier: ^9.5.11
         version: 9.5.11(next@16.2.6(@playwright/test@1.60.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
@@ -363,8 +363,8 @@ packages:
     resolution: {integrity: sha512-yRYXHqXktj/9a4XwjEPN1R62hZjSghh6+qLJJUa1uLtitV8SNYlBYP9m9mlvGj/ZI/o6joBJQ3eqQcpck2WW5Q==}
     engines: {node: '>=18.0.0'}
 
-  '@gugbab/utils@1.1.0':
-    resolution: {integrity: sha512-1elhF/guMFa4EWL5OSVm3SvW7ZOzWCME9XfZ7KWyykCdgak75ZLb4oSVbphySiq+zkG+uVNI6DxV9RbzGcodYw==}
+  '@gugbab/utils@1.2.0':
+    resolution: {integrity: sha512-o/3y83dk9+9GiiySPIfs0aCrF7Jc6L5yyP8/OB1oBLmXI+eWGtmOa6iWj98s8uWlInMsePFMCqTgYiac+tbXpA==}
     engines: {node: '>=18.0.0'}
 
   '@img/colour@1.1.0':
@@ -1452,7 +1452,7 @@ snapshots:
 
   '@gugbab/utils@1.0.1': {}
 
-  '@gugbab/utils@1.1.0': {}
+  '@gugbab/utils@1.2.0': {}
 
   '@img/colour@1.1.0': {}
 

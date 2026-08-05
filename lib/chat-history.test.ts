@@ -50,3 +50,83 @@ describe("toOutgoingMessages", () => {
         expect(toOutgoingMessages([])).toEqual([]);
     });
 });
+
+describe("toOutgoingMessages — 요약 기반 압축", () => {
+    const long = "긴 해몽 답변 ".repeat(600); // 4000자 초과
+
+    it("최근 4개보다 오래된 model 메시지는 요약으로 대체한다", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "뱀 꿈을 꿨어" },
+            { role: "model", content: long, summary: "뱀 꿈은 재물운의 상징이라는 해석." },
+            { role: "user", content: "그 다음은?" },
+            { role: "model", content: "이어지는 답변" },
+            { role: "user", content: "또 물었다" },
+            { role: "model", content: "또 답했다" },
+        ]);
+        expect(out[1].content).toBe("[이전 답변 요약] 뱀 꿈은 재물운의 상징이라는 해석.");
+    });
+
+    it("요약이 없는 오래된 model 메시지는 기존처럼 절삭한다 (best-effort 폴백)", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "뱀 꿈" },
+            { role: "model", content: long },
+            { role: "user", content: "q2" },
+            { role: "model", content: "a2" },
+            { role: "user", content: "q3" },
+            { role: "model", content: "a3" },
+        ]);
+        expect(out[1].content.length).toBeLessThanOrEqual(MESSAGE_LIMITS.maxContentLength);
+        expect(out[1].content).toContain("…(이하 생략)");
+        expect(out[1].content).not.toContain("[이전 답변 요약]");
+    });
+
+    it("빈 문자열 요약은 없는 것으로 취급해 절삭 폴백한다", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "뱀 꿈" },
+            { role: "model", content: long, summary: "" },
+            { role: "user", content: "q2" },
+            { role: "model", content: "a2" },
+            { role: "user", content: "q3" },
+            { role: "model", content: "a3" },
+        ]);
+        expect(out[1].content).toContain("…(이하 생략)");
+    });
+
+    it("최근 4개 메시지는 요약이 있어도 원문을 유지한다 (클램프만 적용)", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "옛 질문" },
+            { role: "model", content: "옛 답변", summary: "옛 요약" },
+            { role: "user", content: "최근 질문" },
+            { role: "model", content: "최근 답변", summary: "최근 요약" },
+            { role: "user", content: "마지막 질문" },
+        ]);
+        // 뒤에서 4개(인덱스 1~4)는 원문 — 인덱스 1의 model도 최근 범위라 요약 미적용
+        expect(out[1].content).toBe("옛 답변");
+        expect(out[3].content).toBe("최근 답변");
+        expect(out[4].content).toBe("마지막 질문");
+    });
+
+    it("전송 메시지에 summary 필드는 포함하지 않는다 ({ role, content }만 전송)", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "질문", summary: "이상하게 붙은 요약" },
+            { role: "model", content: "답변", summary: "요약" },
+        ]);
+        for (const m of out) {
+            expect(Object.keys(m).sort()).toEqual(["content", "role"]);
+        }
+    });
+
+    it("요약 대체 후에도 글자수 상한을 지킨다 (과대 요약 방어)", () => {
+        const hugeSummary = "요".repeat(MESSAGE_LIMITS.maxContentLength + 100);
+        const out = toOutgoingMessages([
+            { role: "user", content: "q1" },
+            { role: "model", content: long, summary: hugeSummary },
+            { role: "user", content: "q2" },
+            { role: "model", content: "a2" },
+            { role: "user", content: "q3" },
+            { role: "model", content: "a3" },
+        ]);
+        expect(out[1].content.length).toBeLessThanOrEqual(MESSAGE_LIMITS.maxContentLength);
+        expect(out[1].content.startsWith("[이전 답변 요약] ")).toBe(true);
+    });
+});

@@ -25,16 +25,22 @@ export function drainSseBuffer(buffer: string, onEvent: (event: ChatSseEvent) =>
     return remaining;
 }
 
+export interface StreamChatResult {
+    modelId: string;
+    /** relay가 생성한 답변 요약 (best-effort — 실패 시 누락) */
+    summary?: string;
+}
+
 /**
  * /api/chat SSE 스트림을 소비한다. chunk 텍스트를 onChunk로 흘리고,
- * done 이벤트의 modelId를 반환한다. error 이벤트·HTTP 오류는 throw.
+ * done 이벤트의 modelId·summary를 반환한다. error 이벤트·HTTP 오류는 throw.
  */
 export async function streamChat(
     sessionId: string,
     messages: ChatTurn[],
     onChunk: (text: string) => void,
     model?: string,
-): Promise<string> {
+): Promise<StreamChatResult> {
     const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -46,6 +52,7 @@ export async function streamChat(
     const decoder = new TextDecoder();
     let buffer = "";
     let modelId = "";
+    let summary: string | undefined;
 
     const handleEvent = (event: ChatSseEvent): void => {
         if (event.type === "chunk") {
@@ -53,6 +60,7 @@ export async function streamChat(
         } else if (event.type === "done") {
             // relay가 modelId를 생략해도 문자열 계약 유지
             modelId = event.modelId ?? "";
+            summary = event.summary;
         } else if (event.type === "error") {
             throw new Error(event.message);
         }
@@ -68,5 +76,5 @@ export async function streamChat(
         buffer = drainSseBuffer(buffer, handleEvent);
     }
 
-    return modelId;
+    return summary !== undefined ? { modelId, summary } : { modelId };
 }
