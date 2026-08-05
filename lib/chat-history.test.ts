@@ -41,9 +41,20 @@ describe("toOutgoingMessages", () => {
     });
 
     it("잘라낸 뒤 첫 메시지가 model이면 제거한다 (relay 규약: 첫 메시지는 user)", () => {
-        const messages = turns(80);
+        // 81개: slice(-30)이 인덱스 51(model)에서 시작 → 드롭 분기가 실제로 실행됨
+        const messages = turns(81);
         const out = toOutgoingMessages(messages);
+        expect(out.length).toBe(29); // 30개 중 선두 model 1개 제거
         expect(out[0].role).toBe("user");
+        expect(out[0].content).toBe("메시지 52");
+    });
+
+    it("윈도우에 user 메시지가 하나도 없으면 빈 배열을 반환한다 (relay 규약 위반 방지)", () => {
+        const allModel: Turn[] = Array.from({ length: 3 }, (_, i) => ({
+            role: "model" as const,
+            content: `답변 ${i}`,
+        }));
+        expect(toOutgoingMessages(allModel)).toEqual([]);
     });
 
     it("빈 이력은 빈 배열을 반환한다", () => {

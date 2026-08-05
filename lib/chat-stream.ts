@@ -60,7 +60,8 @@ export async function streamChat(
         } else if (event.type === "done") {
             // relay가 modelId를 생략해도 문자열 계약 유지
             modelId = event.modelId ?? "";
-            summary = event.summary;
+            // JSON.parse 캐스트 경계 — 비문자열 summary가 IDB로 흘러들지 않게 가드
+            summary = typeof event.summary === "string" ? event.summary : undefined;
         } else if (event.type === "error") {
             throw new Error(event.message);
         }

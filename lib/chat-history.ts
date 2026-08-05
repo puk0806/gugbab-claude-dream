@@ -42,7 +42,9 @@ function clampContent(content: string): string {
 export function toOutgoingMessages(messages: readonly HistoryMessage[]): OutgoingMessage[] {
     const sliced = messages.slice(-MAX_OUTGOING_COUNT);
     const firstUserIdx = sliced.findIndex((m) => m.role === "user");
-    const window = firstUserIdx > 0 ? sliced.slice(firstUserIdx) : sliced;
+    // user 메시지가 하나도 없으면 빈 배열 — relay 규약 위반 payload를 만들지 않는다
+    if (firstUserIdx === -1) return [];
+    const window = sliced.slice(firstUserIdx);
     return window.map((m, i) => {
         const isRecent = i >= window.length - RECENT_VERBATIM_COUNT;
         if (!isRecent && m.role === "model" && m.summary) {
