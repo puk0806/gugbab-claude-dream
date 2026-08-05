@@ -672,6 +672,22 @@
         </ul>
       </div>
 
+      <!-- 요약 기반 이력 압축 단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">이력 압축 v2 · <span style="color:var(--accent)">relay 요약(wantSummary) 기반</span></div>
+          <div class="phase-meta">6/6 완료 ✅ (2026-08-04)</div>
+        </div>
+        <ul class="checklist">
+          <li class="done">@gugbab/utils 1.1.0 → 1.2.0 — SseEvent done 변형에 summary?: string 추가된 버전</li>
+          <li class="done">/api/chat — wantSummary: true 전환 · injectDoneFields가 relay done의 summary를 보존해 함께 주입</li>
+          <li class="done">streamChat 반환 확장: modelId → { modelId, summary? } · ChatSseEvent done에 summary? 추가</li>
+          <li class="done">ChatMessage(model)에 summary? 저장 (IDB 선택 필드 — 마이그레이션 불필요)</li>
+          <li class="done">toOutgoingMessages — 최근 4개 원문 유지 · 오래된 model 턴은 "[이전 답변 요약]"으로 대체 (요약 없으면 절삭 폴백, 전송은 { role, content }만)</li>
+          <li class="done">vitest 98건 통과 (요약 대체/폴백/원문 유지/summary 보존 11건 신규) · typecheck · biome · 빌드 통과 · Codex 리뷰 이슈 0건</li>
+        </ul>
+      </div>
+
       <!-- 4단계 -->
       <div class="phase">
         <div class="phase-head">
