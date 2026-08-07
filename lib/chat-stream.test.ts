@@ -66,9 +66,30 @@ describe("streamChat", () => {
         );
 
         const chunks: string[] = [];
-        const modelId = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
         expect(chunks.join("")).toBe("꿈은 마음의 거울이에요");
-        expect(modelId).toBe("sonnet");
+        expect(result.modelId).toBe("sonnet");
+        expect(result.summary).toBeUndefined();
+    });
+
+    it("returns summary when done event carries one", async () => {
+        stubFetch(
+            streamOf(
+                sseLine({ type: "chunk", text: "해몽 답변" }),
+                sseLine({ type: "done", sessionId: "s1", modelId: "sonnet", summary: "뱀 꿈 재물운 해석." }),
+            ),
+        );
+
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], () => {});
+        expect(result).toEqual({ modelId: "sonnet", summary: "뱀 꿈 재물운 해석." });
+    });
+
+    it("omits summary key when done event has none (best-effort 누락 허용)", async () => {
+        stubFetch(streamOf(sseLine({ type: "done", sessionId: "s1", modelId: "opus" })));
+
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], () => {});
+        expect(result).toEqual({ modelId: "opus" });
+        expect("summary" in result).toBe(false);
     });
 
     it("handles an event split across network chunks", async () => {

@@ -30,16 +30,16 @@ describe("streamChat — 예외·경계 시나리오", () => {
     it("done 이벤트 없이 스트림이 끝나면 빈 modelId를 반환한다 (crash 없음)", async () => {
         stubFetch(streamOf(sseLine({ type: "chunk", text: "잘리다 만 응답" })));
         const chunks: string[] = [];
-        const modelId = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
         expect(chunks.join("")).toBe("잘리다 만 응답");
-        expect(modelId).toBe("");
+        expect(result).toEqual({ modelId: "" });
     });
 
     it("done 이벤트에 modelId가 없어도 문자열 계약을 유지한다", async () => {
         stubFetch(streamOf(sseLine({ type: "done", sessionId: "s1" })));
-        const modelId = await streamChat("s1", [{ role: "user", content: "꿈" }], () => {});
-        expect(modelId).toBe("");
-        expect(typeof modelId).toBe("string");
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], () => {});
+        expect(result.modelId).toBe("");
+        expect(typeof result.modelId).toBe("string");
     });
 
     it("한글 멀티바이트 문자가 네트워크 청크 경계에서 쪼개져도 깨지지 않는다", async () => {
@@ -101,9 +101,9 @@ describe("streamChat — 예외·경계 시나리오", () => {
             ),
         );
         const chunks: string[] = [];
-        const modelId = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
         expect(chunks.join("").length).toBe(50_000);
-        expect(modelId).toBe("opus");
+        expect(result.modelId).toBe("opus");
     });
 
     it("알 수 없는 이벤트 타입은 무시하고 계속 진행한다 (전방 호환)", async () => {
@@ -115,8 +115,8 @@ describe("streamChat — 예외·경계 시나리오", () => {
             ),
         );
         const chunks: string[] = [];
-        const modelId = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
+        const result = await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
         expect(chunks.join("")).toBe("정상 응답");
-        expect(modelId).toBe("sonnet");
+        expect(result.modelId).toBe("sonnet");
     });
 });

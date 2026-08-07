@@ -81,6 +81,7 @@ describe("POST /api/chat (dream relay proxy)", () => {
         const sentBody = JSON.parse(options.body as string);
         expect(sentBody.app).toBe("dream");
         expect(sentBody.model).toBe("opus");
+        expect(sentBody.wantSummary).toBe(true);
         expect((options.headers as Record<string, string>)["X-Relay-Secret"]).toBe("test-secret");
         expect(mockGetChatSystemPrompt).toHaveBeenCalledWith("deep");
     });
@@ -137,6 +138,72 @@ describe("POST /api/chat (dream relay proxy)", () => {
             { type: "chunk", text: "안녕" },
             { type: "done", sessionId: "s1", modelId: "sonnet" },
         ]);
+    });
+
+    it("preserves relay summary in the injected done event", async () => {
+        mockRelaySse(
+            'data: {"type":"chunk","text":"해몽"}\n\ndata: {"type":"done","summary":"뱀 꿈은 재물운이라는 해석."}\n\n',
+        );
+
+        const { POST } = await importRoute();
+        const res = await POST(
+            makeRequest({
+                messages: [{ role: "user", content: "뱀 꿈" }],
+                sessionId: "s1",
+                model: "sonnet",
+            }) as never,
+        );
+        const text = await res.text();
+        const events = text
+            .split("\n\n")
+            .filter((line) => line.startsWith("data: "))
+            .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>);
+
+        expect(events).toEqual([
+            { type: "chunk", text: "해몽" },
+            { type: "done", sessionId: "s1", modelId: "sonnet", summary: "뱀 꿈은 재물운이라는 해석." },
+        ]);
+    });
+
+    it("omits summary from done event when relay sends none (best-effort)", async () => {
+        mockRelaySse('data: {"type":"done"}\n\n');
+
+        const { POST } = await importRoute();
+        const res = await POST(
+            makeRequest({
+                messages: [{ role: "user", content: "뱀 꿈" }],
+                sessionId: "s1",
+            }) as never,
+        );
+        const text = await res.text();
+        const done = text
+            .split("\n\n")
+            .filter((line) => line.startsWith("data: "))
+            .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>)
+            .find((e) => e.type === "done");
+
+        expect(done).toBeDefined();
+        expect(done).not.toHaveProperty("summary");
+    });
+
+    it("ignores non-string summary from relay (계약 위반 값 방어)", async () => {
+        mockRelaySse('data: {"type":"done","summary":{"nested":"object"}}\n\n');
+
+        const { POST } = await importRoute();
+        const res = await POST(
+            makeRequest({
+                messages: [{ role: "user", content: "뱀 꿈" }],
+                sessionId: "s1",
+            }) as never,
+        );
+        const text = await res.text();
+        const done = text
+            .split("\n\n")
+            .filter((line) => line.startsWith("data: "))
+            .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>)
+            .find((e) => e.type === "done");
+
+        expect(done).not.toHaveProperty("summary");
     });
 
     it("returns SSE error stream when relay fetch throws", async () => {

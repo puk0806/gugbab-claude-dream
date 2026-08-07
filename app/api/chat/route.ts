@@ -2,6 +2,7 @@ import type { ChatRequest, SSEError } from "@gugbab/relay-types";
 import { toSSELine } from "@gugbab/utils";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
+import { MESSAGE_LIMITS } from "@/lib/chat-history";
 import { getChatSystemPrompt } from "@/lib/prompts/chat";
 import type { ChatSseEvent } from "@/lib/types";
 
@@ -10,11 +11,11 @@ export const maxDuration = 60;
 
 const MessageSchema = z.object({
     role: z.enum(["user", "model"]),
-    content: z.string().min(1).max(4000),
+    content: z.string().min(1).max(MESSAGE_LIMITS.maxContentLength),
 });
 
 const ChatRequestSchema = z.object({
-    messages: z.array(MessageSchema).min(1).max(50),
+    messages: z.array(MessageSchema).min(1).max(MESSAGE_LIMITS.maxCount),
     // ulid 26자 기준 여유 상한 — done 이벤트에 반사되므로 과대 값 차단
     sessionId: z.string().min(1).max(64),
     // 형식만 검증하고 그대로 relay에 전달 — 모델 유효성의 단일 소스는 relay
@@ -42,7 +43,8 @@ function errorStream(message: string): ReadableStream<Uint8Array> {
     });
 }
 
-// relay의 done 이벤트에 sessionId·modelId를 주입해 클라이언트 SSE 계약(ChatSseEvent)을 유지한다
+// relay의 done 이벤트에 sessionId·modelId를 주입해 클라이언트 SSE 계약(ChatSseEvent)을 유지한다.
+// relay가 실어준 summary(best-effort)는 유실 없이 함께 전달한다.
 function injectDoneFields(
     body: ReadableStream<Uint8Array>,
     sessionId: string,
@@ -64,7 +66,13 @@ function injectDoneFields(
                         try {
                             const event = JSON.parse(part.slice(6)) as Record<string, unknown>;
                             if (event.type === "done") {
-                                const doneEvent: ChatSseEvent = { type: "done", sessionId, modelId };
+                                const summary = typeof event.summary === "string" ? event.summary : undefined;
+                                const doneEvent: ChatSseEvent = {
+                                    type: "done",
+                                    sessionId,
+                                    modelId,
+                                    ...(summary !== undefined ? { summary } : {}),
+                                };
                                 controller.enqueue(encoder.encode(toSSELine(doneEvent)));
                                 continue;
                             }
@@ -125,6 +133,8 @@ export async function POST(req: NextRequest): Promise<Response> {
                 app: "dream",
                 systemPrompt,
                 messages,
+                // done 이벤트에 답변 요약(한국어 1~3문장, best-effort) 요청 — 이력 압축에 사용
+                wantSummary: true,
                 ...(parsed.model ? { model: parsed.model } : {}),
             } satisfies RelayChatBody),
             signal: req.signal,

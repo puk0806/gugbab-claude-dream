@@ -2,6 +2,8 @@ export interface ChatMessage {
     role: "user" | "model";
     content: string;
     timestamp: number;
+    /** relay가 생성한 답변 요약 (model 전용, best-effort) — 오래된 턴 전송 시 원문 대체용 */
+    summary?: string;
 }
 
 export interface DreamSession {
@@ -28,5 +30,5 @@ export type { ModelAlias, ModelInfo, ModelsResponse } from "@gugbab/relay-types"
 
 export type ChatSseEvent =
     | { type: "chunk"; text: string }
-    | { type: "done"; sessionId: string; modelId: string }
+    | { type: "done"; sessionId: string; modelId: string; summary?: string }
     | { type: "error"; message: string };
