@@ -11,6 +11,8 @@ export interface UseChatSessionOptions {
     readonly model?: string;
     /** 어시스턴트 응답 완료 시 호출 (TTS 낭독 등) */
     readonly onAssistantComplete?: (text: string) => void;
+    /** 과거 세션 이어하기 — 초기 세션 상태로 주입 (히스토리 → 세션 페이지) */
+    readonly initialSession?: DreamSession | null;
 }
 
 export interface UseChatSessionReturn {
@@ -22,8 +24,12 @@ export interface UseChatSessionReturn {
     readonly startNewSession: () => void;
 }
 
-export function useChatSession({ model, onAssistantComplete }: UseChatSessionOptions): UseChatSessionReturn {
-    const [session, setSession] = useState<DreamSession | null>(null);
+export function useChatSession({
+    model,
+    onAssistantComplete,
+    initialSession,
+}: UseChatSessionOptions): UseChatSessionReturn {
+    const [session, setSession] = useState<DreamSession | null>(initialSession ?? null);
     const [streamingText, setStreamingText] = useState("");
     const [isStreaming, setIsStreaming] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
