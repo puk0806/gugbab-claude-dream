@@ -57,6 +57,7 @@
 }
 
 .newSessionBtn {
+  display: block;
   margin: var(--gugbab-space-2, 8px) auto;
   padding: var(--gugbab-space-2, 8px) var(--gugbab-space-4, 16px);
   font-size: 13px;
@@ -65,6 +66,8 @@
   border: 1px solid var(--gugbab-color-border-base, #cdced6);
   border-radius: 999px;
   cursor: pointer;
+  text-decoration: none;
+  text-align: center;
 }
 
 .errorBanner {

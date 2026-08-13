@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
-import { ChatView } from "@/components/ChatView";
+import { ChatScreen } from "@/components/ChatScreen";
 import { getSession } from "@/lib/db";
-import { formatDate } from "@/lib/format";
 import type { DreamSession } from "@/lib/types";
 import styles from "./page.module.css";
 
@@ -13,6 +12,8 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
     const [session, setSession] = useState<DreamSession | null | "loading">("loading");
 
     useEffect(() => {
+        // id 변경(세션 간 이동) 시 이전 세션 화면이 남지 않도록 로딩 상태로 리셋
+        setSession("loading");
         getSession(id)
             .then((s) => setSession(s ?? null))
             .catch(() => setSession(null));
@@ -33,26 +34,6 @@ export default function SessionPage({ params }: { params: Promise<{ id: string }
         );
     }
 
-    return (
-        <main className={styles.page}>
-            <header className={styles.header}>
-                <Link href="/history" className={styles.back}>
-                    ← 히스토리
-                </Link>
-                <div className={styles.meta}>
-                    <div>{formatDate(session.createdAt)}</div>
-                    <div>{session.messages.length}개 메시지</div>
-                </div>
-            </header>
-
-            <ChatView messages={session.messages} streamingText="" isStreaming={false} />
-
-            <p className={styles.readonlyNote}>
-                읽기 전용 — 이어서 대화하려면{" "}
-                <Link href="/" style={{ color: "var(--gugbab-color-accent-base, #0090ff)" }}>
-                    홈으로
-                </Link>
-            </p>
-        </main>
-    );
+    // key로 세션 교체 시 ChatScreen을 remount — initialSession은 mount 시 1회만 읽히므로
+    return <ChatScreen key={session.id} initialSession={session} />;
 }
