@@ -8,4 +8,5 @@
 - [시각 회귀 베이스라인 macOS PNG 커밋 금지](feedback_visual_regression.md) — __screenshots__/ 는 .gitignore, CI만 git add -f로 커밋. accept-baseline 라벨로 Ubuntu 기준 재생성
 - [lfcorp 프록시 Node TLS 이슈](project_lfcorp_proxy_node_tls.md) — 회사망에서 Node fetch/pnpm SELF_SIGNED_CERT_IN_CHAIN 실패, NODE_EXTRA_CA_CERTS로 해결
 - [이력 압축 v2 — relay 요약 기반](project_dream_history_summary.md) — wantSummary 적용 완료(2026-08-04), 후속 후보: DreamSession.summary AI 요약 교체(사용자 요청 대기)
+- [이력 압축 v3 — 크로스 리뷰 반영](project_history_v3_cross_review.md) — health 세션이 클라이언트 압축을 @gugbab/utils 위임으로 교체 + 재시도 예산 축소 (2026-08-14, 미커밋)
 - [Cursor git lock 경합](project_cursor_git_lock_race.md) — Cursor gitWorker가 index.lock을 순간 점유, git 쓰기 명령은 재시도 루프로 감싼다
