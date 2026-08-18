@@ -40,6 +40,25 @@ metadata:
 
 검증: vitest 115개 전부 통과, tsc 클린, biome 클린 (2026-08-14).
 
+## ✅ 2026-08-18 수렴 종결 — 추가 크로스 스윕 불필요
+
+dream 세션이 health 3차 점검분까지 대조해 포팅을 완료하고 수렴을 **종결**했다.
+vitest 122건(변이 테스트로 검증력 확인)·tsc·biome·Codex 무지적.
+
+- **포팅 완료 (dream ← health)**: 빈 content 전송 필터(zod min(1) 거부로 인한
+  방 브릭 방지), appendTranscript 서로게이트 절단 방어, RETRY_BUDGET_BYTES
+  파생값, 문구 통일, relay-types 1.0.0-202608141124
+- **dream 원본이라 갱신 불필요**: zod 첫/마지막 user 미러링, KEEP_RECENT_TURNS 3,
+  적대적 테스트, 재시도 개수 5, 프롬프트 상한 회귀 가드
+- **health 전용이라 포팅 안 함**: trimContextForPrompt(컨텍스트 주입 절삭),
+  transient 메시지, metric 필터 — dream은 정적 프롬프트·에러 배너 구조라 해당 없음
+- **의도적 차이 없음** — 두 앱 대칭 확인됨
+
+**갱신 루프 재발 방지 규칙**: 두 레포가 미커밋 상태로 병렬 세션에서 서로
+고치는 것이 루프의 원인이었다. 앞으로 크로스 포팅은 ① 양쪽 커밋(기준선 확정)
+후 ② handoff 문서(relay 레포 docs/handoff/ 또는 명시 프롬프트)로만 진행하고,
+ad-hoc 스윕은 하지 않는다.
+
 ## 남은 것
 
 - 커밋·PR은 사용자 명시 요청 대기 ([[commit-push-user-approval]] 참조).
