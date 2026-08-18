@@ -1,9 +1,10 @@
 import type { ChatRequest, SSEError } from "@gugbab/relay-types";
-import { toSSELine } from "@gugbab/utils";
+import { fitMessagesToBudget, isHistoryValidationError, toSSELine } from "@gugbab/utils";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import { MESSAGE_LIMITS } from "@/lib/chat-history";
 import { getChatSystemPrompt } from "@/lib/prompts/chat";
+import { OUTGOING_BUDGET_BYTES, RETRY_BUDGET_BYTES, RETRY_MAX_MESSAGES } from "@/lib/relay-limits";
 import type { ChatSseEvent } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -15,7 +16,13 @@ const MessageSchema = z.object({
 });
 
 const ChatRequestSchema = z.object({
-    messages: z.array(MessageSchema).min(1).max(MESSAGE_LIMITS.maxCount),
+    messages: z
+        .array(MessageSchema)
+        .min(1)
+        .max(MESSAGE_LIMITS.maxCount)
+        // relay 계약 미러링(첫·마지막 role=user): model로 끝나는 기형 이력을 사전 가드가
+        // 조용히 재작성(직전 질문 중복 답변)하지 않도록 여기서 명시적으로 거부한다
+        .refine((msgs) => msgs[0]?.role === "user" && msgs.at(-1)?.role === "user"),
     // ulid 26자 기준 여유 상한 — done 이벤트에 반사되므로 과대 값 차단
     sessionId: z.string().min(1).max(64),
     // 형식만 검증하고 그대로 relay에 전달 — 모델 유효성의 단일 소스는 relay
@@ -121,9 +128,17 @@ export async function POST(req: NextRequest): Promise<Response> {
         content: m.content,
     }));
 
-    let relayRes: Response;
-    try {
-        relayRes = await fetch(`${relayUrl}/api/chat`, {
+    // relay 합산 바이트·개수 상한 사전 가드 — 오래된 왕복부터 드롭해 400 왕복 자체를 줄인다
+    const fitted = fitMessagesToBudget(messages, OUTGOING_BUDGET_BYTES, MESSAGE_LIMITS.maxCount);
+    if (fitted.length === 0) {
+        return new Response(JSON.stringify({ error: "입력을 확인해주세요" }), {
+            status: 400,
+            headers: { "content-type": "application/json" },
+        });
+    }
+
+    const callRelay = (msgs: typeof fitted) =>
+        fetch(`${relayUrl}/api/chat`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -132,13 +147,36 @@ export async function POST(req: NextRequest): Promise<Response> {
             body: JSON.stringify({
                 app: "dream",
                 systemPrompt,
-                messages,
+                messages: msgs,
                 // done 이벤트에 답변 요약(한국어 1~3문장, best-effort) 요청 — 이력 압축에 사용
                 wantSummary: true,
                 ...(parsed.model ? { model: parsed.model } : {}),
             } satisfies RelayChatBody),
             signal: req.signal,
         });
+
+    let relayRes: Response;
+    try {
+        relayRes = await callRelay(fitted);
+
+        if (relayRes.status === 400) {
+            let body: { errorCode?: string; violation?: string } = {};
+            try {
+                body = (await relayRes.json()) as { errorCode?: string; violation?: string };
+            } catch {
+                // 본문 파싱 실패 — 아래 일반 오류 경로로
+            }
+            if (isHistoryValidationError(body)) {
+                // 이력 총량 초과 — 바이트 예산도 절반으로 조이고 최근 왕복만 남겨 1회 재시도
+                // (꿈 해몽은 직전 맥락으로 충분, 예산 축소는 상수 drift 흡수용)
+                relayRes = await callRelay(fitMessagesToBudget(fitted, RETRY_BUDGET_BYTES, RETRY_MAX_MESSAGES));
+            } else if (body.violation === "message-size") {
+                // 개별 메시지 길이 초과 — 드롭으로 복구 불가, 재시도 금지
+                return new Response(errorStream("메시지가 너무 길어요. 내용을 줄여서 다시 보내주세요."), {
+                    headers: SSE_HEADERS,
+                });
+            }
+        }
     } catch {
         return new Response(errorStream("릴레이 서버에 연결할 수 없어요"), {
             headers: SSE_HEADERS,

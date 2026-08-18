@@ -702,6 +702,21 @@
         </ul>
       </div>
 
+      <!-- relay 입력 상한 대응 단계 -->
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-title">relay 입력 상한 대응 · <span style="color:var(--accent)">사전 가드 + 400 자동 복구</span></div>
+          <div class="phase-meta">4/4 완료 ✅ (2026-08-14)</div>
+        </div>
+        <ul class="checklist">
+          <li class="done">@gugbab/utils 1.2.0 → 1.3.0 — 공유 유틸(fitMessagesToBudget·isHistoryValidationError) 사용, 로직 재구현 없음</li>
+          <li class="done">lib/relay-limits.ts — relay x-relay-limits 기준 로컬 상수 + 예산 90KB(10% 마진) + 재시도 상한 5개</li>
+          <li class="done">/api/chat — role 변환 직후 바이트·개수 사전 가드 · 400 history-budget 시 최근 2왕복 트림 후 1회 재시도 · message-size는 재시도 없이 안내 문구</li>
+          <li class="done">ChatInput maxLength 4,000자(앱 상한 재사용) + 음성 인식 append 클램프(서로게이트 절단 방어) · 실측 SSE 정상 (사전 가드 경유 chunk→done)</li>
+          <li class="done">health 크로스 리뷰 수렴 — 클라 압축 유틸 위임(KEEP_RECENT_TURNS 3)·재시도 바이트 절반·zod 첫/마지막 user 미러링·빈 content 브릭 방지·프롬프트 상한 회귀 가드 · vitest 122건(변이 테스트 검증) · Codex 반복 라운드 무지적</li>
+        </ul>
+      </div>
+
       <!-- 4단계 -->
       <div class="phase">
         <div class="phase-head">
