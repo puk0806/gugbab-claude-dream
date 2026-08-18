@@ -1,8 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { MESSAGE_LIMITS } from "@/lib/chat-history";
 import { createRecognizer, isRecognitionSupported, isSpeechSynthesisSupported, type MicError } from "@/lib/speech";
 import styles from "./ChatInput.module.css";
+
+/**
+ * 음성 인식 최종 결과를 기존 입력에 이어붙인다.
+ * textarea의 maxLength 속성은 프로그램적 setState를 막지 못하므로 여기서 상한을 강제하고,
+ * 절단 지점이 서로게이트 쌍(이모지 등) 중간이면 한 코드유닛 더 제거해 깨진 문자를 남기지 않는다.
+ */
+export function appendTranscript(prev: string, transcript: string, max: number): string {
+    const composed = prev ? `${prev} ${transcript}` : transcript;
+    if (composed.length <= max) return composed;
+    const cut = composed.slice(0, max);
+    const last = cut.charCodeAt(cut.length - 1);
+    return last >= 0xd800 && last <= 0xdbff ? cut.slice(0, -1) : cut;
+}
 
 interface ChatInputProps {
     onSend: (text: string) => void;
@@ -51,7 +65,7 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
                 (transcript, isFinal) => {
                     if (isFinal) {
                         // 최종 결과만 실제 입력에 반영 (interim 덮어쓰기 방지)
-                        setText((prev) => (prev ? `${prev} ${transcript}` : transcript));
+                        setText((prev) => appendTranscript(prev, transcript, MESSAGE_LIMITS.maxContentLength));
                         setInterimText("");
                     } else {
                         // 중간 결과는 힌트로만 표시
@@ -131,6 +145,7 @@ export function ChatInput({ onSend, disabled, ttsEnabled, onTtsToggle }: ChatInp
                     placeholder={listening ? "듣는 중..." : "꿈을 이야기해보세요"}
                     rows={1}
                     disabled={disabled}
+                    maxLength={MESSAGE_LIMITS.maxContentLength}
                     aria-label="꿈 입력"
                 />
                 {ttsAvailable && (
