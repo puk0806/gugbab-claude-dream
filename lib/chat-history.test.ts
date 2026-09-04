@@ -181,3 +181,37 @@ describe("toOutgoingMessages — 요약 기반 압축", () => {
         expect(out[1].content).toContain("긴 해몽 답변");
     });
 });
+
+describe("toOutgoingMessages — 끊긴 답변", () => {
+    it("truncated model 답변은 끊김 표시를 붙여 전송한다 (모델이 완결 답변으로 오인하지 않게)", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "뱀 꿈" },
+            { role: "model", content: "해몽을 시작하자면", truncated: true },
+            { role: "user", content: "이어서 말해줘" },
+        ]);
+        expect(out[1].content).toContain("해몽을 시작하자면");
+        expect(out[1].content).toContain("응답이 중간에 끊김");
+        expect(out[0].content).toBe("뱀 꿈");
+        expect(out[2].content).toBe("이어서 말해줘");
+    });
+
+    it("끊긴 답변이 글자수 상한에 가까워도 표시가 잘리지 않고 상한 안에 들어간다", () => {
+        const long = "꿈".repeat(MESSAGE_LIMITS.maxContentLength);
+        const out = toOutgoingMessages([
+            { role: "user", content: "뱀 꿈" },
+            { role: "model", content: long, truncated: true },
+            { role: "user", content: "그래서?" },
+        ]);
+        expect(out[1].content.length).toBeLessThanOrEqual(MESSAGE_LIMITS.maxContentLength);
+        expect(out[1].content.endsWith("이 답변은 미완성)")).toBe(true);
+    });
+
+    it("완결 답변(truncated 없음)에는 표시가 붙지 않는다", () => {
+        const out = toOutgoingMessages([
+            { role: "user", content: "뱀 꿈" },
+            { role: "model", content: "완결 답변" },
+            { role: "user", content: "고마워" },
+        ]);
+        expect(out[1].content).toBe("완결 답변");
+    });
+});

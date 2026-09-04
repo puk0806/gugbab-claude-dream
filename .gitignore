@@ -37,10 +37,6 @@ public/sw.js.map
 public/swe-worker-*.js
 public/workbox-*.js
 
-# Compiled prompts (빌드 산출 — main에 박지 않음)
-lib/prompts/_compiled/*
-!lib/prompts/_compiled/.gitkeep
-
 # IDE / OS
 .vscode/*
 !.vscode/extensions.json

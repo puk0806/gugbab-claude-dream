@@ -1,6 +1,6 @@
 # 훅 (Hooks)
 
-Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 22종 = 실행 훅 20종 + 공통 유틸 `_lib.js` + `statusline.sh`).
+Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 24종 = 실행 훅 22종 + 공통 유틸 `_lib.js` + `statusline.sh`).
 
 훅 파일 위치: `.claude/hooks/`
 
@@ -40,12 +40,14 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 22종 = 실행 �
 
 ---
 
-## 개발 전용 훅 (2종) — dev 템플릿 (react-spa·nextjs·rust-axum·java·unity)
+## 개발 전용 훅 (4종) — dev 템플릿 (react-spa·nextjs·rust-axum·java·unity)
 
 | 훅 | 이벤트 | 설명 | 테스트 |
 |----|--------|------|:---:|
 | [tdd-guard.js](../../.claude/hooks/tdd-guard.js) | PostToolUse Write/Edit | 소스 파일 수정 시 대응 테스트 파일 존재 여부 검사 — 없으면 차단 (hooks/commands/scripts/ 제외) | ✅ |
 | [test-fake-guard.js](../../.claude/hooks/test-fake-guard.js) | PreToolUse Bash | echo/printf/true로 테스트 결과를 흉내내는 가짜 테스트 실행 차단 | ✅ |
+| [adversarial-test-guard.js](../../.claude/hooks/adversarial-test-guard.js) | PostToolUse Write/Edit | 테스트 파일이 정상 흐름만 담고 악성 유저 방어·이상 경로를 누락하면 차단 — 테스트 2케이스↑ & 적대적 커버리지(에러/보안/경계) 2카테고리↓, RED 초기 1케이스·waiver 예외 | ✅ |
+| [fake-impl-guard.js](../../.claude/hooks/fake-impl-guard.js) | PostToolUse Write/Edit | 파라미터를 무시하고 테스트 기대 리터럴(문자열/숫자)을 그대로 return하는 가짜 구현 차단 — boolean·상수 getter·waiver 제외 | ✅ |
 
 ---
 
@@ -53,7 +55,7 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 22종 = 실행 �
 
 | 훅 | 이벤트 | 설명 | 테스트 |
 |----|--------|------|:---:|
-| [typescript-quality.js](../../.claude/hooks/typescript-quality.js) | PostToolUse Write/Edit | .ts/.tsx 저장 시 tsc --noEmit 자동 실행 — 오류 있으면 차단 | ✅ |
+| [typescript-quality.js](../../.claude/hooks/typescript-quality.js) | PostToolUse Write/Edit | .ts/.tsx 저장 시 tsc --noEmit 자동 실행 — 오류 있으면 차단. `--changed-only`(레거시 프로파일): 증분 컴파일 + 베이스라인(직전 통과 시점 에러 집합) 대비 **새로 생긴 에러만** 차단(소비자 파일 회귀 포함), 타임아웃 180s. `--seed --project <dir>`로 베이스라인 선생성(설치 시 루트+패키지 전부 제안). 베이스라인은 키별 개수(multiset)로 `~/.claude/typescript-quality/`에 영속 보관. 타임아웃·도구 장애(로컬 tsc 없음 등)는 1회 경고, 연속 2회부터 차단. 컴파일러는 `npx --no-install`로 프로젝트 로컬만 사용 | ✅ |
 
 ---
 
@@ -90,7 +92,7 @@ Claude Code 이벤트에 반응하는 자동화 훅 모음 (총 22종 = 실행 �
 
 ```
 공통 (15종)      ← 모든 템플릿
-├── 개발 전용 (2종)  ← react-spa·nextjs·rust-axum·java-spring-*·unity-game
+├── 개발 전용 (4종)  ← react-spa·nextjs·rust-axum·java-spring-*·unity-game
 │   └── TypeScript (1종)  ← react-spa·nextjs만 추가
 ├── Memory (2종)    ← --memory 옵션 선택 시 추가
 ├── Codex (1종)     ← --codex 옵션 선택 시 추가

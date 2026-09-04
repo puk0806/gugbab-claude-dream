@@ -40,3 +40,10 @@
   color: var(--gugbab-color-fg-primary, #1c2024);
   border-bottom-left-radius: 4px;
 }
+
+.truncated {
+  display: block;
+  margin-top: var(--gugbab-space-2, 8px);
+  font-size: 12px;
+  opacity: 0.7;
+}

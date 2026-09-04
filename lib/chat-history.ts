@@ -19,6 +19,8 @@ export interface OutgoingMessage {
 /** 압축 입력 형태 — model 메시지는 relay가 생성한 요약(best-effort)을 가질 수 있다 */
 export interface HistoryMessage extends OutgoingMessage {
     summary?: string;
+    /** 스트림이 끊겨 부분만 남은 답변 — 모델이 완결 답변으로 오인하지 않게 전송 시 끊김 표시를 붙인다 */
+    truncated?: boolean;
 }
 
 // 전송 이력 상한 — API 상한(50)보다 낮게 잡아 여유를 둔다
@@ -27,11 +29,18 @@ const MAX_OUTGOING_COUNT = 30;
 // 3왕복은 리팩터링 이전의 "최근 4개 메시지" 보호 범위를 항상 포함한다 (동작 회귀 방지)
 const KEEP_RECENT_TURNS = 3;
 const TRUNCATION_MARK = "\n…(이하 생략)";
+const INTERRUPTED_MARK = "\n…(응답이 중간에 끊김 — 이 답변은 미완성)";
 const SUMMARY_PREFIX = "[이전 답변 요약] ";
 
 function clampContent(content: string): string {
     if (content.length <= MESSAGE_LIMITS.maxContentLength) return content;
     return content.slice(0, MESSAGE_LIMITS.maxContentLength - TRUNCATION_MARK.length) + TRUNCATION_MARK;
+}
+
+/** 끊긴 답변은 표시를 붙여 전송 — 글자수 상한 안에서 표시가 잘리지 않도록 본문을 먼저 줄인다 */
+function markInterrupted(content: string): string {
+    const room = MESSAGE_LIMITS.maxContentLength - INTERRUPTED_MARK.length;
+    return (content.length > room ? content.slice(0, room) : content) + INTERRUPTED_MARK;
 }
 
 /**
@@ -53,7 +62,7 @@ export function toOutgoingMessages(messages: readonly HistoryMessage[]): Outgoin
     // @gugbab/utils의 role 계약은 "user" | "assistant" — model을 매핑했다가 되돌린다
     const normalized = sendable.map((m) => ({
         role: m.role === "model" ? ("assistant" as const) : ("user" as const),
-        content: m.content,
+        content: m.role === "model" && m.truncated ? markInterrupted(m.content) : m.content,
         summary: m.summary,
     }));
     const compressed = compressHistory(normalized, {

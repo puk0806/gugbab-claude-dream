@@ -50,8 +50,12 @@ function errorStream(message: string): ReadableStream<Uint8Array> {
     });
 }
 
+const STREAM_INTERRUPTED_MESSAGE = "응답이 중간에 끊겼어요. 다시 시도해주세요.";
+
 // relay의 done 이벤트에 sessionId·modelId를 주입해 클라이언트 SSE 계약(ChatSseEvent)을 유지한다.
 // relay가 실어준 summary(best-effort)는 유실 없이 함께 전달한다.
+// relay 스트림이 done 없이 끝나면(업스트림 타임아웃·연결 끊김) error 이벤트를 합성해
+// 클라이언트가 잘린 답변을 완결된 답변으로 저장하지 않게 한다.
 function injectDoneFields(
     body: ReadableStream<Uint8Array>,
     sessionId: string,
@@ -60,6 +64,30 @@ function injectDoneFields(
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
     let buffer = "";
+    let sawDone = false;
+
+    const forward = (part: string, controller: TransformStreamDefaultController<Uint8Array>): void => {
+        if (part.startsWith("data: ")) {
+            try {
+                const event = JSON.parse(part.slice(6)) as Record<string, unknown>;
+                if (event.type === "done") {
+                    sawDone = true;
+                    const summary = typeof event.summary === "string" ? event.summary : undefined;
+                    const doneEvent: ChatSseEvent = {
+                        type: "done",
+                        sessionId,
+                        modelId,
+                        ...(summary !== undefined ? { summary } : {}),
+                    };
+                    controller.enqueue(encoder.encode(toSSELine(doneEvent)));
+                    return;
+                }
+            } catch {
+                // malformed SSE line — pass through as-is
+            }
+        }
+        controller.enqueue(encoder.encode(`${part}\n\n`));
+    };
 
     return body.pipeThrough(
         new TransformStream<Uint8Array, Uint8Array>({
@@ -67,31 +95,17 @@ function injectDoneFields(
                 buffer += decoder.decode(chunk, { stream: true });
                 const parts = buffer.split("\n\n");
                 buffer = parts.pop() ?? "";
-
-                for (const part of parts) {
-                    if (part.startsWith("data: ")) {
-                        try {
-                            const event = JSON.parse(part.slice(6)) as Record<string, unknown>;
-                            if (event.type === "done") {
-                                const summary = typeof event.summary === "string" ? event.summary : undefined;
-                                const doneEvent: ChatSseEvent = {
-                                    type: "done",
-                                    sessionId,
-                                    modelId,
-                                    ...(summary !== undefined ? { summary } : {}),
-                                };
-                                controller.enqueue(encoder.encode(toSSELine(doneEvent)));
-                                continue;
-                            }
-                        } catch {
-                            // malformed SSE line — pass through as-is
-                        }
-                    }
-                    controller.enqueue(encoder.encode(`${part}\n\n`));
-                }
+                for (const part of parts) forward(part, controller);
             },
             flush(controller) {
-                if (buffer) controller.enqueue(encoder.encode(buffer));
+                // 디코더가 물고 있는 멀티바이트 꼬리 바이트를 먼저 비운다 — 안 그러면 마지막 한글이 잘려 파싱 실패
+                buffer += decoder.decode();
+                // 종결자(`\n\n`) 없이 끝난 꼬리도 이벤트로 시도 — 마지막 done이 여기 걸릴 수 있다
+                if (buffer) forward(buffer, controller);
+                if (!sawDone) {
+                    const event: SSEError = { type: "error", message: STREAM_INTERRUPTED_MESSAGE };
+                    controller.enqueue(encoder.encode(toSSELine(event)));
+                }
             },
         }),
     );

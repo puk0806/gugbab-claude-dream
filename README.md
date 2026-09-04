@@ -1,13 +1,13 @@
 # 꿈해몽 PWA
 
-> 어젯밤 꿈을 채팅으로 이야기하면 Gemini가 해석해주는 PWA. 음성 입력·TTS 지원. 회원가입·서버 DB 없음. 브라우저 로컬에 최근 100건만 저장. 홈 화면에 설치 가능(Android 네이티브 / iOS Safari 가이드).
+> 어젯밤 꿈을 채팅으로 이야기하면 Claude가 해석해주는 PWA. 음성 입력·TTS 지원. 회원가입·서버 DB 없음. 브라우저 로컬에 최근 100건만 저장. 홈 화면에 설치 가능(Android 네이티브 / iOS Safari 가이드).
 
 ## 기술 스택
 
 - **Next.js 16** (App Router) + **React 19** + **TypeScript 5**
 - **PWA**: `@serwist/next`
 - **UI**: `@gugbab/styled-radix` (Radix Themes lookalike 35종) + `@gugbab/tokens` (CSS 변수)
-- **LLM**: Google Gemini 2.5 Flash via `@google/genai` + system instruction + SSE 스트리밍 (무료 한도 일 1,500 req)
+- **LLM**: [gugbab-claude-relay](https://github.com/puk0806/gugbab-claude-relay) `/api/chat` 프록시 (Claude, SSE 스트리밍). 앱은 LLM SDK를 직접 들고 있지 않고 `systemPrompt` + 대화 이력만 relay로 보낸다
 - **로컬 저장**: IndexedDB via `idb`
 - **검증**: `zod` (입력) / `ulid` (ID)
 - **린트·포맷**: Biome (`@gugbab/biome-config` 확장)
@@ -17,7 +17,7 @@
 
 ```bash
 pnpm install
-cp .env.example .env.local  # 그 후 GEMINI_API_KEY 입력 (https://aistudio.google.com/apikey)
+cp .env.example .env.local  # 그 후 RELAY_URL / RELAY_SECRET 입력 (relay 서버와 동일한 값)
 pnpm dev                    # http://localhost:3000
 ```
 
@@ -26,13 +26,13 @@ pnpm dev                    # http://localhost:3000
 | 명령 | 설명 |
 |------|------|
 | `pnpm dev` | dev 서버 (turbopack) |
-| `pnpm build` | prod 빌드 (`--webpack` — @serwist/next 호환) + prebuild 로 compile-prompts 자동 실행 |
+| `pnpm build` | prod 빌드 (`--webpack` — @serwist/next 호환) |
 | `pnpm start` | prod 서버 |
 | `pnpm typecheck` | TypeScript 타입 검증 |
+| `pnpm test` | Vitest 단위·통합 테스트 |
 | `pnpm lint` / `pnpm lint:fix` | Biome lint |
 | `pnpm format` / `pnpm format:check` | Biome format |
 | `pnpm check` / `pnpm check:fix` | Biome lint + format 한꺼번에 |
-| `pnpm compile-prompts` | `.claude/skills/humanities` + `.claude/agents/{research,validation}/dream-*` → `lib/prompts/_compiled/*.ts` 변환 |
 | `pnpm test:visual` | Playwright 시각 회귀 비교 (Phase 1-B) |
 | `pnpm test:visual:update` | 시각 회귀 베이스라인 갱신 (로컬 X, CI 전용) |
 

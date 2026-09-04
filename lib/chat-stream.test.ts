@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { drainSseBuffer, streamChat } from "./chat-stream";
+import { ChatStreamError, drainSseBuffer, STREAM_ERROR_MESSAGES, streamChat } from "./chat-stream";
 import type { ChatSseEvent } from "./types";
 
 function sseLine(event: object): string {
@@ -94,7 +94,9 @@ describe("streamChat", () => {
 
     it("handles an event split across network chunks", async () => {
         const line = sseLine({ type: "chunk", text: "분할 전송" });
-        stubFetch(streamOf(line.slice(0, 10), line.slice(10)));
+        stubFetch(
+            streamOf(line.slice(0, 10), line.slice(10), sseLine({ type: "done", sessionId: "s1", modelId: "opus" })),
+        );
 
         const chunks: string[] = [];
         await streamChat("s1", [{ role: "user", content: "꿈" }], (t) => chunks.push(t));
@@ -108,9 +110,45 @@ describe("streamChat", () => {
         );
     });
 
-    it("throws on non-OK HTTP response", async () => {
+    it("non-OK HTTP 응답은 상태 코드를 노출하지 않고 일반 문구로 던진다", async () => {
         stubFetch(null, false, 503);
-        await expect(streamChat("s1", [{ role: "user", content: "꿈" }], () => {})).rejects.toThrow("HTTP 503");
+        const err = await streamChat("s1", [{ role: "user", content: "꿈" }], () => {}).catch((e: unknown) => e);
+        expect(err).toBeInstanceOf(ChatStreamError);
+        expect((err as Error).message).toBe(STREAM_ERROR_MESSAGES.generic);
+        expect((err as Error).message).not.toContain("503");
+    });
+
+    it("non-OK HTTP 응답에 서버 error 문구가 있으면 그 문구를 사용자에게 보여준다", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockResolvedValue({
+                ok: false,
+                status: 503,
+                body: null,
+                json: () => Promise.resolve({ error: "릴레이 서버가 설정되지 않았어요" }),
+            }),
+        );
+        await expect(streamChat("s1", [{ role: "user", content: "꿈" }], () => {})).rejects.toThrow(
+            "릴레이 서버가 설정되지 않았어요",
+        );
+    });
+
+    it("signal로 전송을 취소하면 AbortError가 그대로 전파된다 (오류가 아닌 취소)", async () => {
+        vi.stubGlobal(
+            "fetch",
+            vi.fn().mockRejectedValue(new DOMException("The user aborted a request.", "AbortError")),
+        );
+        const controller = new AbortController();
+        controller.abort();
+        const err = await streamChat(
+            "s1",
+            [{ role: "user", content: "꿈" }],
+            () => {},
+            undefined,
+            controller.signal,
+        ).catch((e: unknown) => e);
+        expect(err).not.toBeInstanceOf(ChatStreamError);
+        expect((err as { name?: string }).name).toBe("AbortError");
     });
 
     it("sends model only when provided", async () => {

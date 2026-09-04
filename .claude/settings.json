@@ -1,10 +1,10 @@
 {
-  "defaultMode": "acceptEdits",
   "enabledPlugins": {
     "superpowers@superpowers-marketplace": true,
     "codex@openai-codex": true
   },
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(node*)",
       "Bash(npx*)",
@@ -141,7 +141,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/deliverable-guard.js"
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/deliverable-guard.js --no-readme"
           }
         ]
       },
@@ -165,11 +165,15 @@
           },
           {
             "type": "command",
-            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/tdd-guard.js"
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/adversarial-test-guard.js"
           },
           {
             "type": "command",
-            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/typescript-quality.js"
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/fake-impl-guard.js"
+          },
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/typescript-quality.js --changed-only"
           },
           {
             "type": "command",
@@ -198,11 +202,15 @@
           },
           {
             "type": "command",
-            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/tdd-guard.js"
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/adversarial-test-guard.js"
           },
           {
             "type": "command",
-            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/typescript-quality.js"
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/fake-impl-guard.js"
+          },
+          {
+            "type": "command",
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/typescript-quality.js --changed-only"
           },
           {
             "type": "command",
@@ -253,7 +261,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/deliverable-guard.js"
+            "command": "node $CLAUDE_PROJECT_DIR/.claude/hooks/deliverable-guard.js --no-readme"
           },
           {
             "type": "command",

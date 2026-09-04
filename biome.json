@@ -15,7 +15,6 @@
       "!pnpm-lock.yaml",
       "!**/.claude",
       "!**/docs",
-      "!lib/prompts/_compiled",
       "!e2e/visual/__screenshots__",
       "!e2e/visual/__diff_archive__",
       "!public/sw.js",
