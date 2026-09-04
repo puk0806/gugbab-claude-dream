@@ -1,0 +1,50 @@
+name: ci
+
+# 타입·린트·단위 테스트 게이트.
+# visual-regression.yml 은 시각 회귀만 다루므로 vitest / tsc / biome 은 여기서 돈다.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.1
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      # App Router·번들링 회귀는 tsc/vitest가 못 잡는다 — 프로덕션 빌드가 실제로 나오는지 확인
+      - name: Production build
+        run: pnpm build
