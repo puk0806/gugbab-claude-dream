@@ -7,7 +7,7 @@ import { ChatInput } from "@/components/ChatInput";
 import { ChatView } from "@/components/ChatView";
 import { InstallButton } from "@/components/install/InstallButton";
 import ModelSheet from "@/components/ModelSheet";
-import { useSpeak } from "@/lib/speech";
+import { useSpeak } from "@gugbab/hooks";
 import type { DreamSession } from "@/lib/types";
 import { useChatSession } from "@/lib/useChatSession";
 import { useModelSelection } from "@/lib/useModelSelection";
@@ -21,7 +21,7 @@ interface ChatScreenProps {
 export function ChatScreen({ initialSession }: ChatScreenProps) {
     const [ttsEnabled, setTtsEnabled] = useState(false);
     const [sheetOpen, setSheetOpen] = useState(false);
-    const { speak, supported: ttsSupported } = useSpeak();
+    const { speak, supported: ttsSupported } = useSpeak({ lang: "ko-KR" });
     const { models, model, selectModel } = useModelSelection();
 
     // SSR hydration mismatch 방지 — 마운트 후 localStorage에서 읽음
