@@ -206,6 +206,86 @@ describe("POST /api/chat (dream relay proxy)", () => {
         expect(done).not.toHaveProperty("summary");
     });
 
+    it("relay 스트림이 done 없이 끝나면 error 이벤트를 합성한다 (잘린 답변을 완결로 저장하지 않게)", async () => {
+        mockRelaySse('data: {"type":"chunk","text":"해몽을 시작하자면"}\n\n');
+
+        const { POST } = await importRoute();
+        const res = await POST(
+            makeRequest({
+                messages: [{ role: "user", content: "뱀 꿈" }],
+                sessionId: "s1",
+            }) as never,
+        );
+        const text = await res.text();
+        const events = text
+            .split("\n\n")
+            .filter((line) => line.startsWith("data: "))
+            .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>);
+
+        expect(events[0]).toEqual({ type: "chunk", text: "해몽을 시작하자면" });
+        expect(events.at(-1)?.type).toBe("error");
+        expect(events.some((e) => e.type === "done")).toBe(false);
+    });
+
+    it("종결자 없이 끝난 마지막 done도 이벤트로 처리한다 (error 합성 없음)", async () => {
+        mockRelaySse('data: {"type":"chunk","text":"안녕"}\n\ndata: {"type":"done"}');
+
+        const { POST } = await importRoute();
+        const res = await POST(
+            makeRequest({
+                messages: [{ role: "user", content: "뱀 꿈" }],
+                sessionId: "s1",
+                model: "sonnet",
+            }) as never,
+        );
+        const text = await res.text();
+        const events = text
+            .split("\n\n")
+            .filter((line) => line.startsWith("data: "))
+            .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>);
+
+        expect(events).toEqual([
+            { type: "chunk", text: "안녕" },
+            { type: "done", sessionId: "s1", modelId: "sonnet" },
+        ]);
+    });
+
+    it("EOF에서 종결자 없이 끝난 done의 한글이 청크 경계에 걸려도 error를 합성하지 않는다", async () => {
+        const tail = 'data: {"type":"done","summary":"뱀 꿈은 재물운 해석."}';
+        const bytes = new TextEncoder().encode(`data: {"type":"chunk","text":"안녕"}\n\n${tail}`);
+        // 마지막 '해석'의 '석'(3바이트) 한가운데를 자른다
+        const cut = bytes.length - 6;
+        const body = new ReadableStream<Uint8Array>({
+            start(controller) {
+                controller.enqueue(bytes.slice(0, cut));
+                controller.enqueue(bytes.slice(cut));
+                controller.close();
+            },
+        });
+        mockFetch.mockResolvedValueOnce(
+            new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } }),
+        );
+
+        const { POST } = await importRoute();
+        const res = await POST(
+            makeRequest({
+                messages: [{ role: "user", content: "뱀 꿈" }],
+                sessionId: "s1",
+                model: "sonnet",
+            }) as never,
+        );
+        const text = await res.text();
+        const events = text
+            .split("\n\n")
+            .filter((line) => line.startsWith("data: "))
+            .map((line) => JSON.parse(line.slice(6)) as Record<string, unknown>);
+
+        expect(events).toEqual([
+            { type: "chunk", text: "안녕" },
+            { type: "done", sessionId: "s1", modelId: "sonnet", summary: "뱀 꿈은 재물운 해석." },
+        ]);
+    });
+
     it("returns SSE error stream when relay fetch throws", async () => {
         mockFetch.mockRejectedValueOnce(new Error("network down"));
 

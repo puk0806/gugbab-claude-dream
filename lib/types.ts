@@ -4,6 +4,8 @@ export interface ChatMessage {
     timestamp: number;
     /** relay가 생성한 답변 요약 (model 전용, best-effort) — 오래된 턴 전송 시 원문 대체용 */
     summary?: string;
+    /** 스트림이 done 없이 끊겨 부분만 남은 답변 (model 전용) — UI에 '끊김' 표시 */
+    truncated?: boolean;
 }
 
 export interface DreamSession {

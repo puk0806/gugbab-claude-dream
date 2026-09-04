@@ -76,7 +76,10 @@ export async function deleteSession(id: string): Promise<void> {
 
 export async function clearAll(): Promise<void> {
     const db = await getDB();
-    await db.clear(SESSION_STORE);
+    // "전체 삭제"는 레거시 v1 엔트리까지 지운다 — 프라이버시 앱에서 복구 가능한 잔존 데이터를 남기지 않는다
+    const tx = db.transaction([SESSION_STORE, ENTRY_STORE], "readwrite");
+    await Promise.all([tx.objectStore(SESSION_STORE).clear(), tx.objectStore(ENTRY_STORE).clear()]);
+    await tx.done;
 }
 
 async function enforceLruLimitSessions(): Promise<void> {
@@ -94,24 +97,4 @@ async function enforceLruLimitSessions(): Promise<void> {
         cursor = await cursor.continue();
     }
     await tx.done;
-}
-
-// ── Entries (v1, 읽기 전용) ────────────────────────────────
-
-export async function getEntry(id: string): Promise<DreamEntry | undefined> {
-    const db = await getDB();
-    return db.get(ENTRY_STORE, id);
-}
-
-export async function listEntriesDesc(limit = LRU_LIMIT): Promise<DreamEntry[]> {
-    const db = await getDB();
-    const tx = db.transaction(ENTRY_STORE, "readonly");
-    const index = tx.store.index("createdAt_idx");
-    const result: DreamEntry[] = [];
-    let cursor = await index.openCursor(null, "prev");
-    while (cursor && result.length < limit) {
-        result.push(cursor.value);
-        cursor = await cursor.continue();
-    }
-    return result;
 }

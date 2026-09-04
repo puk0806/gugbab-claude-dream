@@ -10,7 +10,14 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     return (
         <div className={`${styles.bubble} ${isUser ? styles.user : styles.ai}`}>
             {!isUser && <div className={styles.avatar}>💭</div>}
-            <div className={styles.content}>{message.content}</div>
+            <div className={styles.content}>
+                {message.content}
+                {message.truncated && (
+                    <span className={styles.truncated} role="status">
+                        응답이 중간에 끊겼어요
+                    </span>
+                )}
+            </div>
         </div>
     );
 }
